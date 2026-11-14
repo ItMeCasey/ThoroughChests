@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Headless check of the whole mod on a real server: every chest level, slot counts, comparator, saving and loading, upgrade cards, locks,
+ * Headless check of the whole mod on a real server: every chest level, slot counts, comparator, saving and loading, upgrade cards,
  * explosions, hopper access, each augment and level, filters, redstone mode, the menu (scroll, search, clicks) and the
  * scripting API without ModJS. Runs once at server start when {@code THOROUGHCHESTS_SELFTEST} is set and prints {@code SELFTEST PASS/FAIL}
  * lines ending in {@code SELFTEST DONE failures=N}. It ticks block entities by hand, so it needs no running game loop.
@@ -80,7 +80,6 @@ public final class SelfTest {
             comparator(new BlockPos(x, y, z + 4));
             persistence(new BlockPos(x, y, z + 8));
             upgrades(new BlockPos(x, y, z + 12));
-            locks(new BlockPos(x, y, z + 16));
             installRules(new BlockPos(x, y, z + 20));
             hoppers(new BlockPos(x, y + 6, z));
             compact(new BlockPos(x, y + 6, z + 4));
@@ -208,8 +207,6 @@ public final class SelfTest {
         be.setItem(77, stack(Items.IRON_INGOT, 33));
         be.setItem(134, stack(Items.GOLD_INGOT, 2));
         augment(be, Augment.FURNACE, 2);
-        be.lockInstalled(owner);
-        be.lockSlot.setItem(0, stack(ModContent.LOCK, 1));
         be.sim.addFuel(500);
         CompoundTag saved = be.saveWithoutMetadata(level.registryAccess());
         Settings.set("level.netherite.slots", 36);
@@ -218,7 +215,6 @@ public final class SelfTest {
         verdict("save_keeps_every_slot", copy.getItem(0).getCount() == 7 && copy.getItem(77).getCount() == 33 && copy.getItem(134).is(Items.GOLD_INGOT), "");
         verdict("load_never_shrinks_below_stored_items", copy.getContainerSize() >= 135, "size=" + copy.getContainerSize());
         verdict("save_keeps_augment", copy.augment() == Augment.FURNACE && copy.augmentLevel() == 2, "");
-        verdict("save_keeps_owner", copy.hasLock() && "selftest_owner".equals(copy.ownerName()) && owner.getStringUUID().equals(copy.ownerId()), "");
         verdict("save_keeps_furnace_bank", Math.abs(copy.sim.burnBank() - 500) < 1e-6, "bank=" + copy.sim.burnBank());
         Settings.reset();
         // The block entity also survives being rebuilt from the world's own chunk data path.
@@ -248,22 +244,17 @@ public final class SelfTest {
         be.setItem(35, stack(Items.DIRT, 9));
         be.setItem(0, stack(Items.EMERALD, 3));
         augment(be, Augment.MAGNET, 1);
-        be.lockInstalled(owner);
-        be.lockSlot.setItem(0, stack(ModContent.LOCK, 1));
         InteractionResult wrong = useCard(p, ChestLevel.GOLD, owner);
         verdict("card_cannot_skip_a_level", wrong == InteractionResult.FAIL && level.getBlockState(p).getBlock() == ModContent.chest(ChestLevel.COPPER), "result=" + wrong);
-        verdict("a_stranger_cannot_upgrade_a_locked_chest", useCard(p, ChestLevel.IRON, stranger) == InteractionResult.FAIL
-                && level.getBlockState(p).getBlock() == ModContent.chest(ChestLevel.COPPER), "");
         ChestLevel[] order = ChestLevel.values();
         for (int i = 1; i < order.length; i++) {
             InteractionResult r = useCard(p, order[i], owner);
             TcChestBlockEntity now = (TcChestBlockEntity) level.getBlockEntity(p);
             boolean ok = r == InteractionResult.SUCCESS && level.getBlockState(p).getBlock() == ModContent.chest(order[i]) && now != null
                     && now.getContainerSize() == order[i].slots() && now.getItem(35).getCount() == 9 && now.getItem(0).is(Items.EMERALD)
-                    && now.augment() == Augment.MAGNET && now.hasLock();
+                    && now.augment() == Augment.MAGNET;
             verdict("card_upgrades_to_" + order[i].id() + "_keeping_everything", ok, "result=" + r + " size=" + (now == null ? -1 : now.getContainerSize())
-                    + " dirt=" + (now == null ? "" : now.getItem(35)) + " emerald=" + (now == null ? "" : now.getItem(0)) + " aug=" + (now == null ? "" : now.augment())
-                    + " lock=" + (now != null && now.hasLock()));
+                    + " dirt=" + (now == null ? "" : now.getItem(35)) + " emerald=" + (now == null ? "" : now.getItem(0)) + " aug=" + (now == null ? "" : now.augment()));
         }
         verdict("netherite_card_does_nothing_on_netherite", useCard(p, ChestLevel.NETHERITE, owner) == InteractionResult.FAIL, "");
         BlockPos q = p.offset(4, 0, 0);
@@ -271,26 +262,6 @@ public final class SelfTest {
         verdict("card_is_consumed_by_survival_players_only", useCard(q, ChestLevel.GOLD, owner) == InteractionResult.SUCCESS, "");
         ItemStack held = owner.getItemInHand(InteractionHand.MAIN_HAND);
         verdict("card_stack_shrinks", held.isEmpty(), "left=" + held.getCount());
-    }
-
-    private static void locks(BlockPos p) {
-        area(p);
-        TcChestBlockEntity be = chest(p, ChestLevel.GOLD);
-        verdict("unlocked_chest_is_open_to_everyone", be.mayAccess(stranger) && be.mayAccess(owner), "");
-        ItemStack lock = stack(ModContent.LOCK, 2);
-        verdict("lock_installs", be.installLock(lock, owner) && be.hasLock() && lock.getCount() == 1, "");
-        verdict("owner_name_is_stored", "selftest_owner".equals(be.ownerName()), be.ownerName());
-        verdict("owner_may_access", be.mayAccess(owner), "");
-        verdict("stranger_may_not_access", !be.mayAccess(stranger), "");
-        verdict("stranger_cannot_mine_it", level.getBlockState(p).getDestroyProgress(stranger, level, p) == 0.0F, "");
-        verdict("owner_can_mine_it", level.getBlockState(p).getDestroyProgress(owner, level, p) > 0.0F, "");
-        verdict("second_lock_is_refused", !be.installLock(stack(ModContent.LOCK, 1), owner), "");
-        Settings.set("lock.block_automation", true);
-        verdict("automation_can_be_blocked_for_locked_chests", be.insertFromAutomation(stack(Items.DIRT, 5), false).getCount() == 5, "");
-        Settings.reset();
-        verdict("automation_works_by_default", be.insertFromAutomation(stack(Items.DIRT, 5), false).isEmpty(), "");
-        be.lockRemoved();
-        verdict("lock_removal_opens_the_chest", !be.hasLock() && be.mayAccess(stranger), "");
     }
 
     private static void installRules(BlockPos p) {
@@ -570,13 +541,6 @@ public final class SelfTest {
         verdict("shift_click_moves_player_items_into_any_chest_slot", count(be, Items.COPPER_INGOT) == 40 && owner.getInventory().getItem(9).isEmpty(), "");
         // Augments and the lock go in and out by sneak-use, never through the screen.
         verdict("menu_has_only_the_window_and_the_inventory", menu.slots.size() == menu.windowSlots() + 36, "slots=" + menu.slots.size());
-        be.lockInstalled(owner);
-        be.lockSlot.setItem(0, stack(ModContent.LOCK, 1));
-        owner.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
-        stranger.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
-        verdict("menu_closes_for_strangers_of_locked_chests", !menu.stillValid(stranger) && menu.stillValid(owner), "");
-        be.takeLock(owner);
-        verdict("taking_the_lock_out_unlocks_the_chest", !be.hasLock() && owner.getInventory().countItem(ModContent.LOCK) >= 1, "");
         verdict("menu_counts_as_an_opener", be.openerCount() == 1, "openers=" + be.openerCount());
         menu.removed(owner);
         verdict("closing_the_menu_closes_the_lid", be.openerCount() == 0, "openers=" + be.openerCount());
@@ -608,15 +572,12 @@ public final class SelfTest {
         var seen = new java.util.ArrayList<String>();
         api.on("augment_installed", e -> seen.add(e.string("augment") + e.number("augment_level")));
         api.on("chest_upgraded", e -> seen.add(e.string("from") + ">" + e.string("to")));
-        api.on("chest_locked", e -> seen.add("locked " + e.string("owner")));
         api.on("chest_opened", e -> seen.add("opened"));
         augment(be, Augment.COMPACT, 1);
         be.augmentSlot.setItem(0, ItemStack.EMPTY);
         be.augmentChanged(false);
-        be.lockInstalled(owner);
-        be.lockRemoved();
         TcChestBlock.upgrade(level, p, ChestLevel.NETHERITE);
-        verdict("script_events_fire", seen.contains("compact1.0") && seen.contains("diamond>netherite") && seen.contains("locked selftest_owner"), seen.toString());
+        verdict("script_events_fire", seen.contains("compact1.0") && seen.contains("diamond>netherite"), seen.toString());
         verdict("api_lists_levels_and_augments", api.levels().size() == 5 && api.augments().size() == 6 && api.slots("gold") == 72, "");
         verdict("api_slot_lookup_rejects_unknown_levels", throwsOn(() -> api.slots("wood")), "");
         var info = api.chest(String.valueOf(level.dimension().identifier()), p.getX(), p.getY(), p.getZ());

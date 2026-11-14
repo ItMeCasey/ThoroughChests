@@ -5,13 +5,11 @@ import com.itmecasey.thoroughchests.AugmentRules;
 import com.itmecasey.thoroughchests.ChestLevel;
 import com.itmecasey.thoroughchests.Fullness;
 import com.itmecasey.thoroughchests.FurnaceSim;
-import com.itmecasey.thoroughchests.LockRule;
 import com.itmecasey.thoroughchests.ModContent;
 import com.itmecasey.thoroughchests.ScriptEvents;
 import com.itmecasey.thoroughchests.Settings;
 import com.itmecasey.thoroughchests.augment.Augments;
 import com.itmecasey.thoroughchests.item.AugmentItem;
-import com.itmecasey.thoroughchests.item.LockItem;
 import com.itmecasey.thoroughchests.menu.TcChestMenu;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,21 +41,17 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-/** The chest's inventory, augment and lock, with the vanilla open counting and lid animation. */
+/** The chest's inventory and augment, with the vanilla open counting and lid animation. */
 public class TcChestBlockEntity extends BlockEntity implements Container, LidBlockEntity {
     private static final int EVENT_OPEN_COUNT = 1;
 
     private NonNullList<ItemStack> items;
-    /** One-slot containers for the augment and the lock. */
+    /** A one-slot container for the augment. */
     public final SimpleContainer augmentSlot = new Slots(1);
-    public final SimpleContainer lockSlot = new Slots(1);
     public final FurnaceSim sim = new FurnaceSim();
     private ItemStack cookInput = ItemStack.EMPTY;
     private ItemStack cookResult = ItemStack.EMPTY;
     private ItemStack pendingOutput = ItemStack.EMPTY;
-    @Nullable
-    private String ownerId;
-    private String ownerName = "";
     private boolean keep;
     /** On a client: the item name of the installed augment, sent by the server so the renderer can draw its overlay. */
     private String clientOverlay = "";
@@ -232,9 +226,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
 
     /** Insertion by hoppers-like automation and the magnet: the Void augment swallows or forwards what does not fit. */
     public ItemStack insertFromAutomation(ItemStack stack, boolean simulate) {
-        if (Settings.getBool("lock.block_automation") && hasLock()) {
-            return stack;
-        }
         ItemStack rest = insertStack(stack, simulate);
         if (rest.isEmpty() || !voidActive()) {
             return rest;
@@ -295,55 +286,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         return n;
     }
 
-    // ---- Lock ----
-
-    public boolean hasLock() {
-        return ownerId != null && !ownerId.isEmpty();
-    }
-
-    public String ownerName() {
-        return ownerName;
-    }
-
-    @Nullable
-    public String ownerId() {
-        return ownerId;
-    }
-
-    public boolean mayAccess(Player player) {
-        return LockRule.canAccess(ownerId, player.getStringUUID(), player.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER), Settings.getBool("lock.ops_bypass"));
-    }
-
-    /** Installs the lock from a stack in the player's hand. */
-    public boolean installLock(ItemStack stack, Player player) {
-        if (hasLock() || !(stack.getItem() instanceof LockItem) || !lockSlot.getItem(0).isEmpty()) {
-            return false;
-        }
-        lockSlot.setItem(0, stack.copyWithCount(1));
-        if (!player.hasInfiniteMaterials()) {
-            stack.shrink(1);
-        }
-        lockInstalled(player);
-        return true;
-    }
-
-    /** Called after a lock item entered the lock slot: its placer becomes the owner. */
-    public void lockInstalled(Player player) {
-        ownerId = player.getStringUUID();
-        ownerName = player.getGameProfile().name();
-        setChanged();
-        fire("chest_locked", "owner", ownerName);
-    }
-
-    /** Called after the lock item left the lock slot. */
-    public void lockRemoved() {
-        String was = ownerName;
-        ownerId = null;
-        ownerName = "";
-        setChanged();
-        fire("chest_unlocked", "owner", was);
-    }
-
     // ---- Augments ----
 
     @Nullable
@@ -376,29 +318,12 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         return true;
     }
 
-    /** Gives the lock back to the player (sneak-use with an empty hand on a chest without an augment). Returns whether there was one. */
-    public boolean takeLock(Player player) {
-        ItemStack stack = lockSlot.getItem(0);
-        if (stack.isEmpty()) {
-            return false;
-        }
-        lockSlot.setItem(0, ItemStack.EMPTY);
-        lockRemoved();
-        if (!player.getInventory().add(stack)) {
-            Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), stack);
-        }
-        return true;
-    }
-
     public ItemStack augmentStack() {
         return augmentSlot.getItem(0);
     }
 
     /** Installs or upgrades the augment from a stack the player holds; consumes one. */
     public boolean installFrom(ItemStack stack, Player player) {
-        if (stack.getItem() instanceof LockItem) {
-            return installLock(stack, player);
-        }
         if (!(stack.getItem() instanceof AugmentItem item) || !AugmentRules.canInstall(installedAugment(), item.installed())) {
             return false;
         }
@@ -588,13 +513,10 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
             items.set(i, other.items.get(i));
         }
         copy(other.augmentSlot, augmentSlot);
-        copy(other.lockSlot, lockSlot);
         sim.load(other.sim.burnBank(), other.sim.cookLeft(), other.sim.cooking());
         cookInput = other.cookInput;
         cookResult = other.cookResult;
         pendingOutput = other.pendingOutput;
-        ownerId = other.ownerId;
-        ownerName = other.ownerName;
         other.items = NonNullList.withSize(0, ItemStack.EMPTY);
         syncToClients();
     }
@@ -613,7 +535,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         }
         returnCooking();
         Containers.dropContents(level, pos, augmentSlot);
-        Containers.dropContents(level, pos, lockSlot);
         // The base class drops the chest's own inventory because this block entity is a Container.
         super.preRemoveSideEffects(pos, state);
     }
@@ -625,9 +546,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         super.saveAdditional(output);
         ContainerHelper.saveAllItems(output, items);
         output.store("augment", ItemStack.OPTIONAL_CODEC, augmentSlot.getItem(0));
-        output.store("lock", ItemStack.OPTIONAL_CODEC, lockSlot.getItem(0));
-        output.putString("owner_id", ownerId == null ? "" : ownerId);
-        output.putString("owner_name", ownerName);
         output.putDouble("burn", sim.burnBank());
         output.putInt("cook_left", sim.cookLeft());
         output.putBoolean("cooking", sim.cooking());
@@ -651,10 +569,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
             }
         }
         augmentSlot.setItem(0, input.read("augment", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
-        lockSlot.setItem(0, input.read("lock", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
-        String owner = input.getStringOr("owner_id", "");
-        ownerId = owner.isEmpty() ? null : owner;
-        ownerName = input.getStringOr("owner_name", "");
         sim.load(input.getDoubleOr("burn", 0.0), input.getIntOr("cook_left", 0), input.getBooleanOr("cooking", false));
         cookInput = input.read("cook_input", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
         cookResult = input.read("cook_result", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);

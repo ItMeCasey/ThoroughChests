@@ -147,14 +147,6 @@ public class TcChestBlock extends BaseEntityBlock implements SimpleWaterloggedBl
     }
 
     @Override
-    protected float getDestroyProgress(BlockState state, Player player, BlockGetter getter, BlockPos pos) {
-        if (getter.getBlockEntity(pos) instanceof TcChestBlockEntity chest && !chest.mayAccess(player)) {
-            return 0.0F;
-        }
-        return super.getDestroyProgress(state, player, getter, pos);
-    }
-
-    @Override
     public boolean propagatesSkylightDown(BlockState state) {
         return state.getFluidState().isEmpty();
     }
@@ -165,10 +157,6 @@ public class TcChestBlock extends BaseEntityBlock implements SimpleWaterloggedBl
         if (stack.getItem() instanceof com.itmecasey.thoroughchests.item.UpgradeCardItem card && card.target().upgradesFrom(level)) {
             if (world.isClientSide()) {
                 return InteractionResult.SUCCESS;
-            }
-            if (world.getBlockEntity(pos) instanceof TcChestBlockEntity chest && !chest.mayAccess(player)) {
-                com.itmecasey.thoroughchests.item.AugmentItem.say(player, Component.translatable("message.thoroughchests.locked", chest.ownerName()));
-                return InteractionResult.FAIL;
             }
             if (upgrade(world, pos, card.target())) {
                 if (!player.hasInfiniteMaterials()) {
@@ -186,11 +174,7 @@ public class TcChestBlock extends BaseEntityBlock implements SimpleWaterloggedBl
         if (!(world instanceof ServerLevel) || !(world.getBlockEntity(pos) instanceof TcChestBlockEntity chest)) {
             return InteractionResult.SUCCESS;
         }
-        if (!chest.mayAccess(player)) {
-            com.itmecasey.thoroughchests.item.AugmentItem.say(player, Component.translatable("message.thoroughchests.locked", chest.ownerName()));
-            return InteractionResult.SUCCESS;
-        }
-        if (player.isSecondaryUseActive() && player.getMainHandItem().isEmpty() && (chest.takeAugment(player) || chest.takeLock(player))) {
+        if (player.isSecondaryUseActive() && player.getMainHandItem().isEmpty() && chest.takeAugment(player)) {
             return InteractionResult.SUCCESS;
         }
         if (player instanceof ServerPlayer) {

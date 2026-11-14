@@ -14,12 +14,11 @@ Spend: none
 - [x] Configurable slot counts, blast resistance, netherite explosion immunity (w:2)
 - [x] Upgrade cards keep contents and move one level (w:2)
 - [x] Hopper and pipe access to every slot (w:2)
-- [x] Lock key with owner-only access (w:2)
 
 ## GUI
 - [x] Scrolling inventory that fits any screen and GUI scale (w:4)
 - [x] Search bar (w:3)
-- [x] Chest screen has only the search bar (Casey removed augment, lock, filter and toggle controls) (w:1)
+- [x] Chest screen has only the search bar (Casey removed the augment, lock, filter and toggle controls; the lock itself is gone) (w:1)
 
 ## Augments
 - [x] Compact (w:3)

@@ -75,8 +75,6 @@ public final class ChestsApi {
         out.put("used", chest.usedSlots());
         out.put("augment", chest.augment() == null ? "" : chest.augment().id());
         out.put("augmentLevel", chest.augmentLevel());
-        out.put("locked", chest.hasLock());
-        out.put("owner", chest.ownerName());
         out.put("open", chest.openerCount());
         out.put("comparator", chest.comparatorSignal());
         return out;

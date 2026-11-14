@@ -11,14 +11,13 @@ CurseForge project 1804333. Docs: https://itmecasey.com/wiki/thoroughchests/. Li
 | Copper, Iron, Gold, Diamond and Netherite Chest | One block with one inventory: 36, 54, 72, 108 and 135 slots by default. Blast resistance rises with each level and Netherite is immune to explosions. Vanilla lid animation and sounds, comparator signal across the whole inventory, hoppers and pipes reach every slot |
 | Upgrade cards | One card moves a chest exactly one level and keeps everything in it. Only the copper chest has a crafting recipe (a vanilla chest and eight copper ingots) |
 | Chest screen | Scrolling window with a search bar (name, `@mod`, `#tag`) and nothing else; it fits any window size and GUI scale |
-| Chest Lock | Sneak-use it on a chest; only the owner (and operators) opens, mines or unlocks the chest |
 | Compact augment | Crafts uniform 2x2 and 3x3 recipes down (ingots to blocks) |
 | Furnace and Blast Furnace augments, levels 1 to 3 | Smelt what is in the chest while it holds fuel; higher levels are faster and use less fuel |
 | Magnet augment, levels 1 to 3 | Pulls item entities in from a radius |
 | Feeder augment, levels 1 to 3 | Feeds hungry players and friendly animals from the chest's food |
 | Void augment | Destroys overflow that does not fit |
 
-One augment per chest, drawn as an overlay on the chest lid. Level 2 goes on top of level 1 and level 3 on top of level 2; the old augment is consumed. Augments and the lock go on by sneak-use and come off by sneak-use with an empty hand; the chest screen has only the search bar, the chest slots and your inventory.
+One augment per chest, drawn as an overlay on the chest lid. Level 2 goes on top of level 1 and level 3 on top of level 2; the old augment is consumed. Augments go on by sneak-use and come off by sneak-use with an empty hand; the chest screen has only the search bar, the chest slots and your inventory.
 
 Scripting: with ModJS installed, server scripts get a `ThoroughChests` global; see [docs/scripting.md](docs/scripting.md). KubeJS: recipes are datapack JSON and the events have a bridge where KubeJS has a build.
 

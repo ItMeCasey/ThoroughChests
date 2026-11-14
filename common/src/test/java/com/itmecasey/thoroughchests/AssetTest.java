@@ -141,12 +141,11 @@ class AssetTest {
     }
 
     @Test
-    void cardsAndLockHaveIcons() throws IOException {
+    void cardsHaveIcons() throws IOException {
         for (ChestLevel level : ChestLevel.values()) {
             if (level != ChestLevel.COPPER) {
                 assertEquals(16, image("textures/item/" + level.id() + "_upgrade_card.png").getWidth());
             }
         }
-        assertEquals(16, image("textures/item/chest_lock.png").getWidth());
     }
 }

@@ -2,7 +2,7 @@
 title: Augments
 summary: The six augments, their levels and how they are installed.
 ---
-A chest holds one augment at a time. Level 1 goes into an empty augment slot. Level 2 goes on top of level 1 of the same augment, and level 3 on top of level 2; the old item is consumed. Put an augment in by sneak-using it on the chest. Sneak-use with an empty hand takes the installed augment back (and, on a chest with no augment, the lock). Furnace and Blast Furnace never mix because only one augment fits. The installed augment is drawn as a small overlay on the top right of the lid, outlined in the color of its level: iron grey for 1, gold for 2, diamond for 3.
+A chest holds one augment at a time. Level 1 goes into an empty augment slot. Level 2 goes on top of level 1 of the same augment, and level 3 on top of level 2; the old item is consumed. Put an augment in by sneak-using it on the chest. Sneak-use with an empty hand takes the installed augment back. Furnace and Blast Furnace never mix because only one augment fits. The installed augment is drawn as a small overlay on the top right of the lid, outlined in the color of its level: iron grey for 1, gold for 2, diamond for 3.
 
 | Augment | What it does | Config keys |
 |---|---|---|

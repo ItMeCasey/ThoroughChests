@@ -11,7 +11,6 @@ Thorough Chests adds a chest with its own big inventory. It is one block, never 
 - **Five levels:** Copper 36 slots, Iron 54, Gold 72, Diamond 108 and Netherite 135 by default. Blast resistance rises with every level and Netherite is immune to explosions.
 - **Upgrade cards:** one card moves a chest exactly one level, contents kept. Only the copper chest is crafted: a vanilla chest and eight copper ingots.
 - **Chest screen:** scroll with the wheel or the scrollbar, search by name, `@mod` or `#tag`.
-- **Chest Lock:** sneak-use it on a chest. Only the owner and operators open, mine or unlock the chest.
 - **Compact augment:** crafts uniform 2x2 and 3x3 recipes down, so ingots become blocks.
 - **Furnace and Blast Furnace augments, levels 1 to 3:** smelt what is in the chest while it holds fuel, and put the results back. Higher levels are faster and use less fuel.
 - **Magnet augment, levels 1 to 3:** pulls item entities in from a growing radius.
@@ -30,7 +29,7 @@ Slot counts, blast resistance and every augment number (speed, fuel use, radius,
 # Compatibility
 
 - Recipe viewers show every recipe, including a Chest Upgrade and an Augment Upgrade category: BEI on Forge and NeoForge, JEI and REI on NeoForge.
-- Show Me What This Is shows level, slots used, augment and owner on Forge and NeoForge. Jade does the same on NeoForge.
+- Show Me What This Is shows level, slots used, and the installed augment on Forge and NeoForge. Jade does the same on NeoForge.
 - ModJS scripts on Forge and NeoForge. KubeJS can change every recipe through datapacks, and gets events through a bridge on NeoForge 26.1.2.
 - EMI has no build for these Minecraft versions yet.
 - Hoppers, pipes and other mods' item transfer see every slot of every chest.

@@ -18,8 +18,7 @@ type ThoroughChestsEventName =
   | 'augment_installed'
   | 'augment_removed'
   | 'augment_action'
-  | 'chest_locked'
-  | 'chest_unlocked';
+  ;
 
 interface ThoroughChestsChestInfo {
   level: ChestLevelId;
@@ -27,8 +26,6 @@ interface ThoroughChestsChestInfo {
   used: number;
   augment: AugmentId | '';
   augmentLevel: number;
-  locked: boolean;
-  owner: string;
   open: number;
   comparator: number;
 }

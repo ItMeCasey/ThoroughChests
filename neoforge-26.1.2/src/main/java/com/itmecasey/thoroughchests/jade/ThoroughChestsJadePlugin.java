@@ -16,7 +16,7 @@ import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
 
 /**
- * The Thorough Chests lines in Jade: level and slots used, the installed augment and the owner of a locked chest. The server works the
+ * The Thorough Chests lines in Jade: level and slots used, and the installed augment. The server works the
  * numbers out and sends them in the block's data. Jade finds this class by its annotation, so it is never loaded unless Jade is installed.
  */
 @WailaPlugin
@@ -32,7 +32,6 @@ public class ThoroughChestsJadePlugin implements IWailaPlugin {
                     data.putInt("used", chest.usedSlots());
                     data.putInt("slots", chest.getContainerSize());
                     data.putString("augment", chest.augment() == null ? "" : chest.augmentStack().getHoverName().getString());
-                    data.putString("owner", chest.hasLock() ? chest.ownerName() : "");
                 }
             }
 
@@ -57,10 +56,6 @@ public class ThoroughChestsJadePlugin implements IWailaPlugin {
                 String augment = data.getStringOr("augment", "");
                 if (!augment.isEmpty()) {
                     tooltip.add(Component.literal(augment));
-                }
-                String owner = data.getStringOr("owner", "");
-                if (!owner.isEmpty()) {
-                    tooltip.add(Component.translatable("smwti.thoroughchests.owner", owner));
                 }
             }
 

@@ -1,7 +1,6 @@
 package com.itmecasey.thoroughchests.forge;
 
 import com.itmecasey.thoroughchests.ScriptEvents;
-import com.itmecasey.thoroughchests.Settings;
 import com.itmecasey.thoroughchests.augment.Augments;
 import com.itmecasey.thoroughchests.block.TcChestBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -20,13 +19,9 @@ final class ChestHandler implements IItemHandler {
         this.chest = chest;
     }
 
-    private boolean locked() {
-        return Settings.getBool("lock.block_automation") && chest.hasLock();
-    }
-
     @Override
     public int getSlots() {
-        return locked() ? 0 : chest.getContainerSize();
+        return chest.getContainerSize();
     }
 
     @Override
@@ -36,7 +31,7 @@ final class ChestHandler implements IItemHandler {
 
     @Override
     public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-        if (stack.isEmpty() || slot < 0 || slot >= chest.getContainerSize() || locked()) {
+        if (stack.isEmpty() || slot < 0 || slot >= chest.getContainerSize()) {
             return stack;
         }
         ItemStack here = chest.getItem(slot);
@@ -64,7 +59,7 @@ final class ChestHandler implements IItemHandler {
 
     @Override
     public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (amount <= 0 || slot < 0 || slot >= chest.getContainerSize() || locked()) {
+        if (amount <= 0 || slot < 0 || slot >= chest.getContainerSize()) {
             return ItemStack.EMPTY;
         }
         ItemStack here = chest.getItem(slot);

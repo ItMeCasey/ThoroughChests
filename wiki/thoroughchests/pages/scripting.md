@@ -15,13 +15,12 @@ Thorough Chests adds a global `ThoroughChests` to ModJS server scripts when ModJ
 | `augment_installed` | `dimension`, `x`, `y`, `z`, `level`, `augment`, `augment_level` |
 | `augment_removed` | `dimension`, `x`, `y`, `z`, `level` |
 | `augment_action` | `dimension`, `x`, `y`, `z`, `augment`, `augment_level`, `action` (`compact`, `smelt`, `blast`, `magnet`, `feed_player`, `feed_animal`, `void`), `item`, `count` |
-| `chest_locked`, `chest_unlocked` | `dimension`, `x`, `y`, `z`, `level`, `owner` |
 
 `ThoroughChests.events()` lists the names. `augment_action` fires for every pass that did something, so a busy magnet fires often; register it only when you need it.
 
 ## Reading chests
 
-- `ThoroughChests.chest(dimension, x, y, z)` returns a read-only map for the chest at that position, or `null` when there is none (or the server has not started): `level`, `slots`, `used`, `augment` (empty text for none), `augmentLevel`, `locked`, `owner`, `open` (players with it open), `comparator`.
+- `ThoroughChests.chest(dimension, x, y, z)` returns a read-only map for the chest at that position, or `null` when there is none (or the server has not started): `level`, `slots`, `used`, `augment` (empty text for none), `augmentLevel`, `open` (players with it open), `comparator`.
 - `ThoroughChests.count(dimension, x, y, z, itemId)` counts one item in a chest (`-1` when there is no chest).
 - `ThoroughChests.levels()` and `ThoroughChests.augments()` list the ids. `ThoroughChests.slots(level)` gives the configured slot count of a level.
 
@@ -50,7 +49,7 @@ ThoroughChests.setSetting('magnet.radius.3', '20');
 
 ## KubeJS
 
-Recipes (the copper chest, the upgrade cards, the lock and every augment) are datapack JSON, so KubeJS and datapacks add, change and remove them like any other recipe. When KubeJS is installed, Thorough Chests writes `kubejs/startup_scripts/thoroughchests.js` once (an existing file is never overwritten). It puts the same API in `global.ThoroughChests`:
+Recipes (the copper chest, the upgrade cards and every augment) are datapack JSON, so KubeJS and datapacks add, change and remove them like any other recipe. When KubeJS is installed, Thorough Chests writes `kubejs/startup_scripts/thoroughchests.js` once (an existing file is never overwritten). It puts the same API in `global.ThoroughChests`:
 
 ```js
 // server_scripts

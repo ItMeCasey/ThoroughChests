@@ -17,10 +17,10 @@ Every integration is optional. The mod loads and works the same with none of the
 
 ## What each integration shows
 
-- **Recipe viewers.** Every crafting recipe of the mod (copper chest, upgrade cards, lock, every augment level) appears in the viewer's crafting category. Two categories of our own: **Chest Upgrade** (a chest and a card give the next chest) and **Augment Upgrade** (an installed level plus the next item give the next level).
-- **SMWTI and Jade.** Level and slots used, the installed augment and level (and whether it is switched off), the owner of a locked chest, and the three most common items.
+- **Recipe viewers.** Every crafting recipe of the mod (copper chest, upgrade cards, every augment level) appears in the viewer's crafting category. Two categories of our own: **Chest Upgrade** (a chest and a card give the next chest) and **Augment Upgrade** (an installed level plus the next item give the next level).
+- **SMWTI and Jade.** Level and slots used, the installed augment and level, and the three most common items.
 - **ModJS.** See [scripting.md](scripting.md).
-- **KubeJS.** Events (`chest_opened`, `chest_closed`, `chest_upgraded`, `augment_installed`, `augment_removed`, `augment_action`, `chest_locked`, `chest_unlocked`) and the same reads as ModJS, through a bridge that is compiled against KubeJS 26.1.2 and loaded by reflection.
+- **KubeJS.** Events (`chest_opened`, `chest_closed`, `chest_upgraded`, `augment_installed`, `augment_removed`, `augment_action`) and the same reads as ModJS, through a bridge that is compiled against KubeJS 26.1.2 and loaded by reflection.
 - **Other mods' automation.** Pipes and hoppers see every slot of every chest through the loader's item handler (Forge `IItemHandler`, NeoForge `ResourceHandler<ItemResource>`) and through the vanilla `Container` interface.
 
 ## Verification status

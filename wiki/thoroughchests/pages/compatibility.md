@@ -21,4 +21,4 @@ Every crafting recipe shows in the viewer crafting category. Two categories of o
 
 ## Info overlays
 
-SMWTI and Jade show the level, the slots used, the installed augment, the owner of a locked chest and, in SMWTI, the three most common items.
+SMWTI and Jade show the level, the slots used, the installed augment and, in SMWTI, the three most common items.

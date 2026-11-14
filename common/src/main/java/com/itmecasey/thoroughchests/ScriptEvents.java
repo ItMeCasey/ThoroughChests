@@ -20,7 +20,7 @@ public final class ScriptEvents {
 
     /** The events scripts can listen to. */
     public static final List<String> TYPES = List.of("chest_opened", "chest_closed", "chest_upgraded", "augment_installed", "augment_removed",
-            "augment_action", "chest_locked", "chest_unlocked");
+            "augment_action");
 
     /** What a script receives: the event name and its values by key. */
     public static final class Event {

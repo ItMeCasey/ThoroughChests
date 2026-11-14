@@ -3,7 +3,6 @@ package com.itmecasey.thoroughchests;
 import com.itmecasey.thoroughchests.block.TcChestBlock;
 import com.itmecasey.thoroughchests.block.TcChestBlockEntity;
 import com.itmecasey.thoroughchests.item.AugmentItem;
-import com.itmecasey.thoroughchests.item.LockItem;
 import com.itmecasey.thoroughchests.item.UpgradeCardItem;
 import com.itmecasey.thoroughchests.menu.TcChestMenu;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ public final class ModContent {
     private static final Map<ChestLevel, UpgradeCardItem> CARDS = new java.util.EnumMap<>(ChestLevel.class);
     private static final List<MenuType<TcChestMenu>> MENUS = new ArrayList<>();
     public static final BlockEntityType<TcChestBlockEntity> CHEST;
-    public static final LockItem LOCK;
 
     static {
         MapColor[] colors = {MapColor.COLOR_ORANGE, MapColor.METAL, MapColor.GOLD, MapColor.DIAMOND, MapColor.COLOR_BLACK};
@@ -69,8 +67,6 @@ public final class ModContent {
                 ITEMS.put(name, item);
             }
         }
-        LOCK = new LockItem(itemProps("chest_lock"));
-        ITEMS.put("chest_lock", LOCK);
         for (int rows = GuiFit.MIN_ROWS; rows <= GuiFit.MAX_ROWS; rows++) {
             int r = rows;
             MENUS.add(new MenuType<>((id, inv) -> new TcChestMenu(menu(r), r, id, inv), FeatureFlags.VANILLA_SET));

@@ -150,15 +150,6 @@ class ChestRulesTest {
     }
 
     @Test
-    void locksOpenForTheOwnerAndOperators() {
-        assertTrue(LockRule.canAccess(null, "a", false, true));
-        assertTrue(LockRule.canAccess("a", "a", false, true));
-        assertFalse(LockRule.canAccess("a", "b", false, true));
-        assertTrue(LockRule.canAccess("a", "b", true, true));
-        assertFalse(LockRule.canAccess("a", "b", true, false));
-    }
-
-    @Test
     void unknownSettingsThrow() {
         assertThrows(IllegalArgumentException.class, () -> Settings.value("nope"));
         assertThrows(IllegalArgumentException.class, () -> Settings.set("nope", 1));

@@ -1,6 +1,5 @@
 package com.itmecasey.thoroughchests.neoforge;
 
-import com.itmecasey.thoroughchests.Settings;
 import com.itmecasey.thoroughchests.augment.Augments;
 import com.itmecasey.thoroughchests.block.TcChestBlockEntity;
 import net.minecraft.world.item.ItemStack;
@@ -22,13 +21,9 @@ final class ChestHandler implements ResourceHandler<ItemResource> {
         this.inner = VanillaContainerWrapper.of(chest);
     }
 
-    private boolean locked() {
-        return Settings.getBool("lock.block_automation") && chest.hasLock();
-    }
-
     @Override
     public int size() {
-        return locked() ? 0 : inner.size();
+        return inner.size();
     }
 
     @Override

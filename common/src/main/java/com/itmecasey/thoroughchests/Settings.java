@@ -1,22 +1,16 @@
 package com.itmecasey.thoroughchests;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeSet;
 
 /**
  * Every tunable number in the mod: the single list of keys, defaults, ranges and descriptions. Each loader layer builds its config
  * spec (NeoForge {@code ModConfigSpec}, Forge {@code ForgeConfigSpec}, file {@code config/thoroughchests-common.toml}) from
  * {@link #defs()} and pushes the loaded values in with {@link #set}, so common code and tests only ever read from here. This class
- * reads and writes no live config file; {@link #legacyValues} only reads the old properties file once for migration.
+ * reads and writes no config file.
  */
 public final class Settings {
     /** The kind of value a setting holds. */
@@ -67,8 +61,6 @@ public final class Settings {
         }
         def("feeder.breed", true, "true lets the Feeder put adult animals into love mode with their food.");
         def("feeder.effect_foods", false, "true lets the Feeder use foods that give effects (golden apples, suspicious stew).");
-        def("lock.ops_bypass", true, "Operators can open, break and unlock locked chests.");
-        def("lock.block_automation", false, "true keeps hoppers and pipes out of locked chests.");
         def("gui.default_rows", 6, 1, 12, "Rows of the chest window when the player has no saved size (1 to 12).");
     }
 
@@ -128,30 +120,5 @@ public final class Settings {
             throw new IllegalArgumentException("Unknown setting " + key);
         }
         return d;
-    }
-
-    /**
-     * Reads the old {@code config/thoroughchests.properties} (never changes or deletes it) so a first start can carry its values into the
-     * new config file. Unknown keys and unreadable files give an empty result.
-     */
-    public static Map<String, String> legacyValues(Path configDir) {
-        Map<String, String> out = new LinkedHashMap<>();
-        Path file = configDir.resolve("thoroughchests.properties");
-        if (!Files.isRegularFile(file)) {
-            return out;
-        }
-        try (Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            Properties p = new Properties();
-            p.load(r);
-            for (String key : p.stringPropertyNames()) {
-                if (DEFS.containsKey(key)) {
-                    out.put(key, p.getProperty(key).trim());
-                }
-            }
-        } catch (IOException | RuntimeException ex) {
-            System.err.println("[ThoroughChests] Could not read " + file + ", ignoring it: " + ex);
-            out.clear();
-        }
-        return out;
     }
 }

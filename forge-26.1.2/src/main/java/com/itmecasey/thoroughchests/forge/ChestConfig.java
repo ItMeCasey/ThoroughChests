@@ -1,17 +1,13 @@
 package com.itmecasey.thoroughchests.forge;
 
 import com.itmecasey.thoroughchests.Settings;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.loading.FMLPaths;
 
 /**
  * The Forge config file {@code config/thoroughchests-common.toml}, built from the single list of settings in common. Its values are
- * pushed into {@link Settings} when the file loads or reloads. On the first start an old {@code thoroughchests.properties} supplies the
- * defaults; that file is only read, never changed or deleted.
+ * pushed into {@link Settings} when the file loads or reloads.
  */
 final class ChestConfig {
     static final ForgeConfigSpec SPEC;
@@ -19,10 +15,8 @@ final class ChestConfig {
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-        Path dir = FMLPaths.CONFIGDIR.get();
-        Map<String, String> legacy = Files.exists(dir.resolve("thoroughchests-common.toml")) ? Map.of() : Settings.legacyValues(dir);
         for (Settings.Def d : Settings.defs()) {
-            String start = legacy.getOrDefault(d.key(), d.fallback());
+            String start = d.fallback();
             builder.comment(d.comment());
             switch (d.kind()) {
                 case INT -> VALUES.put(d.key(), builder.defineInRange(d.key(), clampInt(start, d), (int) d.min(), (int) d.max()));

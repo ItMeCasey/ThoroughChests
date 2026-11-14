@@ -2,10 +2,6 @@
 title: Troubleshooting
 summary: Common questions.
 ---
-## "Locked by" and the chest will not open
-
-A lock is on the chest and you are not its owner. The owner opens it and takes the lock out, or an operator does (setting `lock.ops_bypass`).
-
 ## An augment does nothing
 
 - Check that the augment is installed: the overlay on the lid shows it.
@@ -15,7 +11,7 @@ A lock is on the chest and you are not its owner. The owner opens it and takes t
 
 ## Hoppers or pipes skip the chest
 
-`lock.block_automation` is true and the chest is locked, or the chest is full and has no Void augment.
+The chest is full and has no Void augment.
 
 ## The chest opens with a different number of rows
 

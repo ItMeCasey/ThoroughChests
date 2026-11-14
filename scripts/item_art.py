@@ -240,29 +240,3 @@ def card(v, tier):
     icon = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     icon.alpha_composite(img, (1, 1))
     return icon
-
-
-def lock(v):
-    gold = tones(v["gold_block"])
-    iron = tones(v["iron_block"])
-    pal = {"O": OUTLINE, "I": iron[2], "i": iron[0], "G": gold[1], "L": gold[3], "D": gold[0], "K": (40, 28, 20)}
-    rows = [
-        "....OOOOOO....",
-        "...OIIIIIIO...",
-        "..OIOOOOOOIO..",
-        "..OIO....OiO..",
-        "..OIO....OiO..",
-        "..OIO....OiO..",
-        ".OOOOOOOOOOOO.",
-        ".OLLLLLLLLGDO.",
-        ".OLGGGKKGGGDO.",
-        ".OLGGGKKGGGDO.",
-        ".OLGGGGKGGGDO.",
-        ".OGGGGGGGGGDO.",
-        ".ODDDDDDDDDDO.",
-        "..OOOOOOOOOO..",
-    ]
-    img = from_rows(rows, pal)
-    icon = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    icon.alpha_composite(img, (1, 1))
-    return icon

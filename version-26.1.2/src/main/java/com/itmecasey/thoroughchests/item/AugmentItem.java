@@ -56,10 +56,6 @@ public class AugmentItem extends Item {
             if (level.isClientSide()) {
                 return InteractionResult.SUCCESS;
             }
-            if (!chest.mayAccess(player)) {
-                say(player, Component.translatable("message.thoroughchests.locked", chest.ownerName()));
-                return InteractionResult.FAIL;
-            }
             ItemStack stack = context.getItemInHand();
             if (chest.installFrom(stack, player)) {
                 return InteractionResult.SUCCESS;

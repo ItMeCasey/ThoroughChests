@@ -11,7 +11,6 @@ All recipes are datapack JSON under `data/thoroughchests/recipe`, so datapacks a
 | Copper Chest | A vanilla chest in the middle, eight copper ingots around it |
 | Iron, Gold, Diamond or Netherite Upgrade Card | Four ingots (diamonds for the diamond card) in a plus shape around one paper |
 | Iron, Gold, Diamond and Netherite Chest | No recipe: use the cards on a chest one level down |
-| Chest Lock | Iron ingot over tripwire hook over gold ingot, in one column |
 
 ## Augments
 

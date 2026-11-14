@@ -45,7 +45,6 @@ def item_names():
         names[f"{lv}_upgrade_card"] = f"{lv.capitalize()} Upgrade Card"
     for _, _, name, label in augment_items():
         names[name] = label
-    names["chest_lock"] = "Chest Lock"
     return names
 
 
@@ -63,7 +62,6 @@ def recipes():
     material = {"iron": "iron_ingot", "gold": "gold_ingot", "diamond": "diamond", "netherite": "netherite_ingot"}
     for lv, mat in material.items():
         out[f"{lv}_upgrade_card"] = shaped([" X ", "XPX", " X "], {"X": mat, "P": "paper"}, f"{lv}_upgrade_card")
-    out["chest_lock"] = shaped(["I", "T", "G"], {"I": "iron_ingot", "T": "tripwire_hook", "G": "gold_ingot"}, "chest_lock")
     tier = {1: "iron_ingot", 2: "gold_ingot", 3: "diamond"}
     heart = {"compact": "crafting_table", "furnace": "furnace", "blast_furnace": "blast_furnace", "magnet": "ender_pearl",
              "feeder": "hopper", "void": "obsidian"}
@@ -84,8 +82,6 @@ def loot(block, style):
 
 LANG_EXTRA = {
     "itemGroup.thoroughchests": "Thorough Chests",
-    "message.thoroughchests.locked": "Locked by %s",
-    "message.thoroughchests.linked": "Linked to %s %s %s",
     "message.thoroughchests.wrong_card": "Wrong card for this chest",
     "gui.thoroughchests.search": "Search",
     "gui.thoroughchests.on": "On",
@@ -103,7 +99,6 @@ LANG_EXTRA = {
     "smwti.thoroughchests.level": "%s Chest, %s of %s slots",
     "smwti.thoroughchests.augment": "%s",
     "smwti.thoroughchests.augment_off": "%s (off)",
-    "smwti.thoroughchests.owner": "Owner: %s",
     "smwti.thoroughchests.contents": "%s x %s",
     "jade.thoroughchests.level": "%s Chest",
     # Recipe viewers

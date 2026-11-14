@@ -364,6 +364,6 @@ public class TcChestMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return chest == null || (!chest.isRemoved() && chest.stillValid(player) && chest.mayAccess(player));
+        return chest == null || (!chest.isRemoved() && chest.stillValid(player));
     }
 }

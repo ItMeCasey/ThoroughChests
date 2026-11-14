@@ -12,4 +12,4 @@ The search bar filters the window by item name. Start a word with `@` to match a
 
 The screen counts how many rows fit the window at the current GUI scale. If that differs from the rows it opened with, it asks the server to reopen with the right number, and the server remembers the number for you for the session. The smallest layout is one row. A chest with fewer slots than the window has rows opens only as tall as it needs.
 
-There is nothing else on the screen: no buttons and no extra slots. Augments and the lock work from the outside of the chest.
+There is nothing else on the screen: no buttons and no extra slots. Augments work from the outside of the chest.

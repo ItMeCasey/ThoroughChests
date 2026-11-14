@@ -42,10 +42,6 @@ public class UpgradeCardItem extends Item {
             }
             return InteractionResult.FAIL;
         }
-        if (player != null && level.getBlockEntity(pos) instanceof com.itmecasey.thoroughchests.block.TcChestBlockEntity be && !be.mayAccess(player)) {
-            AugmentItem.say(player, Component.translatable("message.thoroughchests.locked", be.ownerName()));
-            return InteractionResult.FAIL;
-        }
         if (TcChestBlock.upgrade(level, pos, target)) {
             if (player == null || !player.hasInfiniteMaterials()) {
                 context.getItemInHand().shrink(1);

@@ -147,9 +147,6 @@ def main():
             sheet = Image.new("RGBA", (192, 192), (0, 0, 0, 0))
             sheet.alpha_composite(item_art.augment_canvas(v, kind, lv).rotate(180), (24, 0))
             save(sheet, "entity", "chest", f"overlay_{name}.png")
-    lock = item_art.lock(v)
-    save(lock, "item", "chest_lock.png")
-    entries.append(("chest_lock", lock))
     review_sheet(entries, os.path.join(ROOT, "docs", "frames", "textures_review.png"))
     chests = Image.new("RGBA", (64 * 5, 64), (60, 60, 60, 255))
     for n, level in enumerate(LEVELS):

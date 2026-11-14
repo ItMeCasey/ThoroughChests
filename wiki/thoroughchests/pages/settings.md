@@ -2,7 +2,7 @@
 title: Settings
 summary: The config file.
 ---
-`config/thoroughchests-common.toml` is made by the loader on the first start with every key, its range and a comment. On NeoForge the mod also has an in-game config screen (Mods, Thorough Chests, Config). Edits reload while the game runs. A pack that still has the old `thoroughchests.properties` has its values imported once; that file is left alone.
+`config/thoroughchests-common.toml` is made by the loader on the first start with every key, its range and a comment. On NeoForge the mod also has an in-game config screen (Mods, Thorough Chests, Config). Edits reload while the game runs.
 
 | Keys | Meaning |
 |---|---|
@@ -13,7 +13,6 @@ summary: The config file.
 | `blast_furnace.speed.N`, `blast_furnace.fuel_use.N` | The same for the Blast Furnace |
 | `magnet.radius.N`, `magnet.interval.N` | Magnet radius in blocks and ticks between pulls |
 | `feeder.range.N`, `feeder.interval.N`, `feeder.breed`, `feeder.effect_foods` | Feeder range, cadence and rules |
-| `lock.ops_bypass`, `lock.block_automation` | Lock rules |
 | `gui.default_rows` | Rows of the chest window before the screen has fitted itself |
 
 Times are in ticks (20 per second).

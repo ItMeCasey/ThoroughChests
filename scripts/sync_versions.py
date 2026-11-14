@@ -34,6 +34,12 @@ def copy_tree(src, dst, transform=None, variants=None):
                 text = transform(text)
             with open(out, "w", encoding="utf-8", newline="\n") as f:
                 f.write(text)
+    # A file removed from the source is removed from the copy too.
+    for base, _, files in os.walk(dst):
+        for name in files:
+            path = os.path.abspath(os.path.join(base, name))
+            if name.endswith(".java") and path not in written:
+                os.remove(path)
 
 
 def v263(text):

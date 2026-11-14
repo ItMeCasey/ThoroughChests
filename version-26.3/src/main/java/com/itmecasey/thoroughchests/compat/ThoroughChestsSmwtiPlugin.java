@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Thorough Chests lines in Show Me What This Is: level and slots used, the installed augment, the owner and the most common items.
+ * The Thorough Chests lines in Show Me What This Is: level and slots used, the installed augment and the most common items.
  * The server works the lines out. SMWTI finds this class by its annotation; nothing calls into it, and it is never loaded unless SMWTI
  * is installed.
  */
@@ -27,9 +27,6 @@ public class ThoroughChestsSmwtiPlugin implements ISmwtiPlugin {
             tooltip.add(Component.translatable("smwti.thoroughchests.level", chest.level().title(), chest.usedSlots(), chest.getContainerSize()));
             if (chest.augment() != null) {
                 tooltip.add(Component.translatable("smwti.thoroughchests.augment", chest.augmentStack().getHoverName()));
-            }
-            if (chest.hasLock()) {
-                tooltip.add(Component.translatable("smwti.thoroughchests.owner", chest.ownerName()));
             }
             Map<String, Integer> counts = new LinkedHashMap<>();
             Map<String, ItemStack> samples = new LinkedHashMap<>();

@@ -30,7 +30,6 @@
       "pages": [
         { "slug": "chests", "title": "Levels and upgrade cards" },
         { "slug": "screen", "title": "The chest screen" },
-        { "slug": "lock", "title": "The chest lock" },
         { "slug": "automation", "title": "Hoppers, pipes and redstone" },
         { "slug": "augments", "title": "Augments" }
       ]
