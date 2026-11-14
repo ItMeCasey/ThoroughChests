@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=north,waterlogged=true": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=east,waterlogged=false": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=east,waterlogged=true": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=south,waterlogged=false": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=south,waterlogged=true": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=west,waterlogged=false": {
+      "model": "thoroughchests:block/diamond_chest"
+    },
+    "facing=west,waterlogged=true": {
+      "model": "thoroughchests:block/diamond_chest"
+    }
+  }
+}

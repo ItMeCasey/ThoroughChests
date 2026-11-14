@@ -2,7 +2,7 @@
 (forge-26.1.2, neoforge-26.1.2) to the other loader layers.
 
 Edit the code in version-26.2; never edit the copies. The few API differences are applied here:
-  - 26.3 removed the block codec() method and moved dropping an item at a player to Containers.
+  - 26.3 removed the block codec() method (the block between the CODEC-BEGIN and CODEC-END markers) and moved dropping an item at a player to Containers.
   - 26.1.2 has the older Minecraft accessors the dev screenshot tour uses (screen, overlay, toasts, render target).
 
 Usage: python scripts/sync_versions.py
@@ -35,6 +35,7 @@ def copy_tree(src, dst, transform=None):
 
 
 def v263(text):
+    text = re.sub(r"\n    // CODEC-BEGIN\n.*?\n    // CODEC-END\n", "\n", text, flags=re.S)
     text = re.sub(r"\n    private static final MapCodec<[^\n]*\n", "\n", text)
     text = re.sub(r"\n    @Override\n    protected MapCodec<[^\n]*\{\n        return CODEC;\n    \}\n", "\n", text)
     text = text.replace("import com.mojang.serialization.MapCodec;\n", "")

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "thoroughchests:item/blast_furnace_augment_2"
+  }
+}

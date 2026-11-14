@@ -1,0 +1,10 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "thoroughchests:item/gold_chest",
+    "model": {
+      "type": "minecraft:chest",
+      "texture": "thoroughchests:gold"
+    }
+  }
+}

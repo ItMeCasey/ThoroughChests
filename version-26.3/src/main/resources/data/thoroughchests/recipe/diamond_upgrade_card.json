@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " X ",
+    "XPX",
+    " X "
+  ],
+  "key": {
+    "X": "minecraft:diamond",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "thoroughchests:diamond_upgrade_card",
+    "count": 1
+  }
+}

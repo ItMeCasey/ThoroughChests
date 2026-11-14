@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " X ",
+    "XPX",
+    " X "
+  ],
+  "key": {
+    "X": "minecraft:iron_ingot",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "thoroughchests:iron_upgrade_card",
+    "count": 1
+  }
+}

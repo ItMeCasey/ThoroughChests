@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "thoroughchests:copper_chest"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "thoroughchests:blocks/copper_chest"
+}

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "thoroughchests:copper_chest",
+    "thoroughchests:iron_chest",
+    "thoroughchests:gold_chest",
+    "thoroughchests:diamond_chest",
+    "thoroughchests:netherite_chest"
+  ]
+}

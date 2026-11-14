@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "key": {
+    "A": "minecraft:iron_ingot",
+    "B": "minecraft:redstone",
+    "C": "minecraft:obsidian"
+  },
+  "result": {
+    "id": "thoroughchests:void_augment",
+    "count": 1
+  }
+}
