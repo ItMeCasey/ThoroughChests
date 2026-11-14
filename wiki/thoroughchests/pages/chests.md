@@ -14,7 +14,7 @@ Slot counts and resistance are in the config (`level.<id>.slots`, `level.<id>.bl
 
 ## Upgrade cards
 
-Use a card on a chest. The card must be exactly one level above the chest, so an iron card upgrades a copper chest, a gold card an iron chest, and so on. A card never skips a level. The contents, the augment, the lock, the filter and every setting stay.
+Use a card on a chest. The card must be exactly one level above the chest, so an iron card upgrades a copper chest, a gold card an iron chest, and so on. A card never skips a level. The contents and the augment stay.
 
 If the config gives a level fewer slots than the chest below it, the chest keeps its size until the extra stacks are emptied, so no item is ever lost.
 
