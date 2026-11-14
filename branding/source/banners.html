@@ -166,7 +166,7 @@ const AUGMENTS = [
   ["item/blast_furnace_augment_3", "Blast Furnace", "Ores and metals, faster"],
   ["item/magnet_augment_3", "Magnet", "Pulls in nearby items"],
   ["item/feeder_augment_3", "Feeder", "Feeds players and animals"],
-  ["item/void_augment", "Void", "Destroys or forwards overflow"],
+  ["item/void_augment", "Void", "Destroys overflow that does not fit"],
 ];
 const CARDS = ["iron", "gold", "diamond", "netherite"];
 
@@ -222,6 +222,17 @@ const ASSETS = {
     for (const c of CARDS) row.append(el("div", {class: "cap", style: "text-align:center"}, art("item/" + c + "_upgrade_card", 130), el("b", {}, c[0].toUpperCase() + c.slice(1) + " " + slots[c])));
     r.append(row);
     r.append(el("div", {class: "tag", style: "font-size:26px"}, "One upgrade card per level. Contents stay."));
+  }],
+  ingame: [1920, 1080, (r) => {
+    r.style.cssText += "display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px";
+    r.append(pixelText("In the game", 9));
+    const row = el("div", {style: "display:flex;gap:30px;align-items:flex-start"});
+    const shot = (file, label, w) => el("div", {class: "cap", style: "text-align:center;margin:0"},
+      el("img", {src: "../../docs/frames/neoforge-26.2/" + file, width: w, style: "image-rendering:pixelated;border:3px solid #2e2a46;display:block"}),
+      el("b", {style: "margin-top:12px"}, label));
+    row.append(shot("levels_closed.png", "Five levels", 560), shot("overlays_overview.png", "Augment overlays on the lid", 560), shot("gui_netherite.png", "Scrolling inventory with search", 560));
+    r.append(row);
+    r.append(el("div", {class: "tag", style: "font-size:24px"}, "Screenshots from the game."));
   }],
 };
 for (const [k, label] of Object.entries({features: "Features", levels: "Levels", augments: "Augments", config: "Settings", compat: "Compatibility", faq: "FAQ"})) {

@@ -33,11 +33,12 @@ Use it for the CurseForge summary (under 250 characters), social posts and the t
 |---|---|
 | `banners/features.png` (1920x1080) | First gallery image: the augments and cards |
 | `banners/levels.png` (1920x1080) | The five levels, second gallery image |
+| `banners/ingame.png` (1920x1080) | Third gallery image: game screenshots of the levels, the lid overlays and the chest screen |
 | `banners/social.png` (1280x640) | GitHub social preview (repo Settings > Social preview) |
 | `banners/banner.png` (800x150, saved at 2x) | Top of the description |
 | `banners/h_*.png` (800x46, saved at 2x) | Optional section headers (features, levels, augments, config, compat, faq); the description uses plain `#` headers |
 
-The pictures are illustrations drawn for the branding; the card and augment faces are the mod's own textures. Add real in-game screenshots from `docs/frames` once they are picked.
+`features`, `levels`, `social` and the headers are drawn for the branding from the mod's own textures. `ingame.png` uses frames from `docs/frames/neoforge-26.2`.
 
 ### Description
 

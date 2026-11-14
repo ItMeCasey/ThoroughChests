@@ -21,6 +21,7 @@ ASSETS = {
     "social": (1280, 640, 1),
     "features": (1920, 1080, 1),
     "levels": (1920, 1080, 1),
+    "ingame": (1920, 1080, 1),
     **{f"h_{k}": (800, 46, 2) for k in ("features", "levels", "augments", "config", "compat", "faq")},
 }
 

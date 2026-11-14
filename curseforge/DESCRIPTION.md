@@ -22,6 +22,8 @@ Thorough Chests adds a chest with its own big inventory. It is one block, never 
 
 ![Levels](https://raw.githubusercontent.com/ItMeCasey/ThoroughChests/main/branding/banners/levels.png)
 
+![In the game](https://raw.githubusercontent.com/ItMeCasey/ThoroughChests/main/branding/banners/ingame.png)
+
 # Settings
 
 Slot counts, blast resistance and every augment number (speed, fuel use, radius, range, cadence) are in `config/thoroughchests-common.toml`.
@@ -33,8 +35,6 @@ Slot counts, blast resistance and every augment number (speed, fuel use, radius,
 - ModJS scripts on Forge and NeoForge. KubeJS can change every recipe through datapacks, and gets events through a bridge on NeoForge 26.1.2.
 - EMI has no build for these Minecraft versions yet.
 - Hoppers, pipes and other mods' item transfer see every slot of every chest.
-
-The pictures on this page are illustrations drawn for the listing, not game screenshots.
 
 # FAQ
 
