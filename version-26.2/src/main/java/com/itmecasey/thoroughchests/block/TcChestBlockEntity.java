@@ -660,12 +660,13 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
 
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
-        if (level != null && !keep) {
-            returnCooking();
-            Containers.dropContents(level, pos, this);
-            Containers.dropContents(level, pos, augmentSlot);
-            Containers.dropContents(level, pos, lockSlot);
+        if (keep || level == null) {
+            return;
         }
+        returnCooking();
+        Containers.dropContents(level, pos, augmentSlot);
+        Containers.dropContents(level, pos, lockSlot);
+        // The base class drops the chest's own inventory because this block entity is a Container.
         super.preRemoveSideEffects(pos, state);
     }
 
@@ -677,7 +678,12 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         ContainerHelper.saveAllItems(output, items);
         output.store("augment", ItemStack.OPTIONAL_CODEC, augmentSlot.getItem(0));
         output.store("lock", ItemStack.OPTIONAL_CODEC, lockSlot.getItem(0));
-        filterSlots.storeAsItemList(output.list("filter", ItemStack.OPTIONAL_CODEC));
+        var filterOut = output.list("filter", net.minecraft.world.ItemStackWithSlot.CODEC);
+        for (int i = 0; i < filterSlots.getContainerSize(); i++) {
+            if (!filterSlots.getItem(i).isEmpty()) {
+                filterOut.add(new net.minecraft.world.ItemStackWithSlot(i, filterSlots.getItem(i)));
+            }
+        }
         output.putBoolean("filter_whitelist", filterWhitelist);
         output.putBoolean("augment_enabled", augmentEnabled);
         output.putInt("redstone", redstone.ordinal());
@@ -706,7 +712,12 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         }
         augmentSlot.setItem(0, input.read("augment", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
         lockSlot.setItem(0, input.read("lock", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
-        filterSlots.fromItemList(input.listOrEmpty("filter", ItemStack.OPTIONAL_CODEC));
+        filterSlots.clearContent();
+        for (net.minecraft.world.ItemStackWithSlot s : input.listOrEmpty("filter", net.minecraft.world.ItemStackWithSlot.CODEC)) {
+            if (s.slot() >= 0 && s.slot() < filterSlots.getContainerSize()) {
+                filterSlots.setItem(s.slot(), s.stack());
+            }
+        }
         filterWhitelist = input.getBooleanOr("filter_whitelist", false);
         augmentEnabled = input.getBooleanOr("augment_enabled", true);
         redstone = RedstoneMode.byOrdinal(input.getIntOr("redstone", 0));

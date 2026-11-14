@@ -16,7 +16,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MASTER = "26.2"
 
 
-def copy_tree(src, dst, transform=None):
+def copy_tree(src, dst, transform=None, variants=None):
     written = set()
     for base, _, files in os.walk(src):
         for name in files:
@@ -28,7 +28,9 @@ def copy_tree(src, dst, transform=None):
             written.add(os.path.abspath(out))
             os.makedirs(os.path.dirname(out), exist_ok=True)
             text = open(path, encoding="utf-8").read()
-            if transform:
+            if variants and name in variants:
+                text = open(variants[name], encoding="utf-8").read()
+            elif transform:
                 text = transform(text)
             with open(out, "w", encoding="utf-8", newline="\n") as f:
                 f.write(text)
@@ -39,6 +41,7 @@ def v263(text):
     text = re.sub(r"\n    private static final MapCodec<[^\n]*\n", "\n", text)
     text = re.sub(r"\n    @Override\n    protected MapCodec<[^\n]*\{\n        return CODEC;\n    \}\n", "\n", text)
     text = text.replace("import com.mojang.serialization.MapCodec;\n", "")
+    text = text.replace(", 0, state.breakProgress);", ", 0);")
     if "player.drop(out, false);" in text:
         text = text.replace("player.drop(out, false);", "Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), out);")
         text = text.replace("import net.minecraft.world.Container;" + chr(10), "import net.minecraft.world.Container;" + chr(10) + "import net.minecraft.world.Containers;" + chr(10), 1)
@@ -66,7 +69,8 @@ def main():
             if v == "26.1.2":
                 copy_tree(src, dst, transform if kind == "dev" else None)
             else:
-                copy_tree(src, dst, transform)
+                variants = {"Fuel.java": os.path.join(ROOT, "scripts", "variants", "Fuel263.java")} if v == "26.3" else None
+                copy_tree(src, dst, transform, variants)
     for loader in ("neoforge", "forge"):
         src = os.path.join(ROOT, f"{loader}-26.1.2", "src")
         for v in ("26.2", "26.3"):

@@ -242,7 +242,7 @@ public final class Augments {
             if (s.isEmpty()) {
                 continue;
             }
-            int burn = level.fuelValues().burnDuration(s);
+            int burn = Fuel.burnTicks(level, chest, s);
             if (burn <= 0 || level.recipeAccess().getRecipeFor(type, new SingleRecipeInput(s), level).isPresent()) {
                 continue;
             }
@@ -325,20 +325,26 @@ public final class Augments {
         chest.setChanged();
     }
 
+    /** Feeds one food item to a hungry player; returns whether it did. */
+    public static boolean feedPlayer(TcChestBlockEntity chest, ServerLevel level, Player player) {
+        if (player.isSpectator() || !player.getFoodData().needsFood()) {
+            return false;
+        }
+        ItemStack food = food(chest, false, null);
+        if (food.isEmpty()) {
+            return false;
+        }
+        player.getFoodData().eat(food.get(DataComponents.FOOD));
+        announce(chest, level, "feed_player", id(food), 1);
+        consumeOne(chest, food);
+        return true;
+    }
+
     private static void feed(TcChestBlockEntity chest, ServerLevel level, int range) {
         AABB box = new AABB(chest.getBlockPos()).inflate(range);
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (e instanceof Player player) {
-                if (player.isSpectator() || !player.getFoodData().needsFood()) {
-                    continue;
-                }
-                ItemStack food = food(chest, false, null);
-                if (food.isEmpty()) {
-                    continue;
-                }
-                player.getFoodData().eat(food.get(DataComponents.FOOD));
-                announce(chest, level, "feed_player", id(food), 1);
-                consumeOne(chest, food);
+                feedPlayer(chest, level, player);
             } else if (e instanceof Animal animal) {
                 ItemStack food = food(chest, true, animal);
                 if (food.isEmpty()) {

@@ -44,7 +44,7 @@ public class AugmentItem extends Item {
     }
 
     public static void say(Player player, Component message) {
-        if (player instanceof ServerPlayer sp) {
+        if (player instanceof ServerPlayer sp && sp.connection != null) {
             sp.sendSystemMessage(message, true);
         }
     }

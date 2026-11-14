@@ -60,7 +60,7 @@ public class TcChestRenderer implements BlockEntityRenderer<TcChestBlockEntity, 
         float open = 1.0F - state.open;
         open = 1.0F - open * open * open;
         SpriteId sprite = Sheets.CHEST_MAPPER.apply(ModContent.id(state.level.id()));
-        collector.submitModel(model, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0, state.breakProgress);
+        collector.submitModel(model, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0);
         poseStack.popPose();
     }
 }
