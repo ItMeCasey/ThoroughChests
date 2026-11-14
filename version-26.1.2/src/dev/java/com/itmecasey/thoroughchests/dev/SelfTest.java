@@ -593,7 +593,14 @@ public final class SelfTest {
 
     private static void scripts(BlockPos p) {
         area(p);
-        verdict("mod_runs_without_modjs", !ScriptBridge.install(), "");
+        boolean modjs = false;
+        try {
+            Class.forName("com.itmecasey.modjs.script.ExtraBindings");
+            modjs = true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            // ModJS is not installed: the normal case for this test
+        }
+        verdict(modjs ? "modjs_is_loaded_and_the_global_was_registered" : "mod_runs_without_modjs", modjs || !ScriptBridge.install(), "");
         ChestsApi api = new ChestsApi();
         TcChestBlockEntity be = chest(p, ChestLevel.DIAMOND);
         be.setItem(3, stack(Items.IRON_INGOT, 12));

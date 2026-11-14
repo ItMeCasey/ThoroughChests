@@ -43,9 +43,19 @@ def check(layer):
     for old in mods.glob("modjs*.jar") if mods.exists() else []:
         old.unlink()
     modjs = os.environ.get("THOROUGHCHESTS_MODJS_JAR")
+    scripts = run / "modjs" / "server_scripts"
+    check_js = scripts / "thoroughchests_check.js"
+    if check_js.exists():
+        check_js.unlink()
     if modjs:
         mods.mkdir(exist_ok=True)
         shutil.copy(modjs, mods / Path(modjs).name)
+        scripts.mkdir(parents=True, exist_ok=True)
+        check_js.write_text(
+            "console.log('TC-SCRIPT global ' + ThoroughChests.levels().length + ' levels ' + ThoroughChests.augments().length + ' augments');\n"
+            "ThoroughChests.on('chest_opened', function (e) { console.log('TC-SCRIPT event chest_opened ' + e.string('level')); });\n"
+            "ThoroughChests.on('chest_upgraded', function (e) { console.log('TC-SCRIPT event chest_upgraded ' + e.string('from') + ' ' + e.string('to')); });\n",
+            encoding="utf-8")
     slot = str(Path.home() / ".claude" / "tools" / "gradle-slot.sh").replace("\\", "/")
     proc = subprocess.Popen([BASH, slot, "./gradlew", "runServer", "--no-daemon", "-q", "-PdevTools"], cwd=folder, env=env,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
@@ -88,6 +98,8 @@ def check(layer):
     if not re.search(r"SELFTEST DONE failures=0", out) or passes == 0:
         bad = [l for l in log if "SELFTEST FAIL" in l or "SELFTEST error" in l]
         return f"SERVER FAIL {layer}: self test did not finish clean (passes={passes}) {bad[:2]}"
+    if modjs and not (re.search(r"TC-SCRIPT global 5 levels 6 augments", out) and "TC-SCRIPT event chest_upgraded" in out):
+        return f"SERVER FAIL {layer}: the ModJS script did not run (see {run / 'server_check.log'})"
     return f"SERVER PASS {layer} (port {PORTS[layer]}, {passes} self-test checks, {int(time.time() - start)}s)"
 
 
