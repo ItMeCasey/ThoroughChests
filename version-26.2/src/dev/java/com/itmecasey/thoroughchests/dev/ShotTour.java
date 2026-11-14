@@ -220,7 +220,7 @@ public final class ShotTour {
             for (int lv = 1; lv <= a.maxLevel(); lv++) {
                 int x = i * 2;
                 String name = a.itemName(lv);
-                then(8, () -> moveTo(new Vec3(x + 0.5, y + 1.0, 9.6), new Vec3(x + 0.5, y + 0.55, 12.5)));
+                then(8, () -> moveTo(new Vec3(x + 1.0, y + 1.9, 10.6), new Vec3(x + 0.75, y + 0.85, 12.5)));
                 shoot("overlay_" + name, 14);
                 if (lv == a.maxLevel()) {
                     then(2, () -> setLid(new BlockPos(x, y, 12), true));
@@ -231,7 +231,7 @@ public final class ShotTour {
             }
         }
         // Overview of all overlays.
-        then(2, () -> moveTo(new Vec3(14.0, y + 2.0, 6.0), new Vec3(14.0, y + 0.6, 12.5)));
+        then(2, () -> moveTo(new Vec3(14.0, y + 3.5, 8.0), new Vec3(14.0, y + 0.6, 12.5)));
         shoot("overlays_overview", 30);
 
         // The screen.
@@ -256,7 +256,7 @@ public final class ShotTour {
         shoot("gui_search_dia", 30);
         then(2, () -> close());
         // Fitting: the same chest at other GUI scales.
-        for (int sc : new int[] {1, 2, 4, 5}) {
+        for (int sc : new int[] {1, 2}) {
             then(6, () -> {
                 Minecraft minecraft = Minecraft.getInstance();
                 minecraft.options.guiScale().set(sc);

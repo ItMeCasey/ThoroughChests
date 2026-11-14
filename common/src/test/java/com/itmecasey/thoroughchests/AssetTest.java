@@ -76,7 +76,7 @@ class AssetTest {
                 int inside = 0;
                 for (int y = 0; y < 192; y++) {
                     for (int x = 0; x < 192; x++) {
-                        boolean front = x >= 12 && x < 24 && y >= 0 && y < 12;
+                        boolean front = x >= 24 && x < 36 && y >= 0 && y < 12;
                         if (alpha(sheet, x, y) > 0) {
                             assertTrue(front, a.itemName(l) + " has a pixel outside the front face at " + x + "," + y);
                             inside++;
@@ -103,8 +103,8 @@ class AssetTest {
                     }
                 }
             }
-            int left = minX - 12;
-            int right = 23 - maxX;
+            int left = minX - 24;
+            int right = 35 - maxX;
             int top = minY;
             int bottom = 11 - maxY;
             assertTrue(Math.abs(left - right) <= 1, a + " is off center horizontally: " + left + " vs " + right);
