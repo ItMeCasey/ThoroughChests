@@ -371,7 +371,7 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         augmentSlot.setItem(0, ItemStack.EMPTY);
         augmentChanged(false);
         if (!player.getInventory().add(stack)) {
-            player.drop(stack, false);
+            Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), stack);
         }
         return true;
     }
@@ -385,7 +385,7 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         lockSlot.setItem(0, ItemStack.EMPTY);
         lockRemoved();
         if (!player.getInventory().add(stack)) {
-            player.drop(stack, false);
+            Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), stack);
         }
         return true;
     }

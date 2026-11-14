@@ -19,7 +19,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 @Mod(ThoroughChests.MODID)
 public final class NeoForgeThoroughChests {
     public NeoForgeThoroughChests(IEventBus modBus, ModContainer container) {
-        container.registerConfig(ModConfig.Type.COMMON, ChestConfig.SPEC);
+        container.registerConfig(ModConfig.Type.LOCAL, ChestConfig.SPEC, "thoroughchests-common.toml");
         modBus.addListener((ModConfigEvent.Loading e) -> onConfig(e.getConfig()));
         modBus.addListener((ModConfigEvent.Reloading e) -> onConfig(e.getConfig()));
         if (FMLEnvironment.getDist() == Dist.CLIENT) {

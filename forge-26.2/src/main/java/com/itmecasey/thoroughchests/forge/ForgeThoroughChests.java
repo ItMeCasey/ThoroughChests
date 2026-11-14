@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 @Mod(ThoroughChests.MODID)
 public final class ForgeThoroughChests {
     public ForgeThoroughChests(FMLJavaModLoadingContext context) {
-        context.registerConfig(ModConfig.Type.COMMON, ChestConfig.SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, ChestConfig.SPEC, "thoroughchests-common.toml");
         ModConfigEvent.Loading.getBus(context.getModBusGroup()).addListener(e -> onConfig(e.getConfig()));
         ModConfigEvent.Reloading.getBus(context.getModBusGroup()).addListener(e -> onConfig(e.getConfig()));
         com.itmecasey.thoroughchests.script.Bridges.install(FMLPaths.GAMEDIR.get());

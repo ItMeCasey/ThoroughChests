@@ -48,6 +48,11 @@ def v263(text):
     return text
 
 
+def loader263(text):
+    # NeoForge 26.3 renamed the COMMON config type to LOCAL (and SERVER to SYNCED); the file name stays the same.
+    return text.replace("ModConfig.Type.COMMON", "ModConfig.Type.LOCAL")
+
+
 def v2612(text):
     text = text.replace("net.minecraft.world.entity.EntityTypes.COW", "net.minecraft.world.entity.EntityType.COW")
     text = text.replace("minecraft.gui.overlay()", "minecraft.getOverlay()").replace("minecraft.gui.screen()", "minecraft.screen")
@@ -79,7 +84,7 @@ def main():
                 s = os.path.join(src, kind, "java")
                 if os.path.isdir(s):
                     d = os.path.join(ROOT, f"{loader}-{v}", "src", kind, "java")
-                    copy_tree(s, d)
+                    copy_tree(s, d, loader263 if (loader == "neoforge" and v == "26.3") else None)
     print("synced")
 
 

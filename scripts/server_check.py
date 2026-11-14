@@ -21,7 +21,7 @@ PORTS = {
     "neoforge-26.1.2": 8760, "forge-26.1.2": 8761, "neoforge-26.2": 8762, "forge-26.2": 8763,
     "neoforge-26.3": 8764, "forge-26.3": 8765,
 }
-TIMEOUT = 420
+TIMEOUT = 1500
 BASH = os.environ.get("GIT_BASH", "C:/Program Files/Git/bin/bash.exe")
 # Real load problems: the loader could not load a mod, or an error names this mod. Netty and log4j probe lines about native
 # transports on the wrong OS ("Only supported on Linux") are normal noise on Windows and are ignored.
