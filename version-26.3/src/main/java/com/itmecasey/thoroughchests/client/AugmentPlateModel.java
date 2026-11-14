@@ -12,8 +12,9 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 
 /**
- * The augment overlay: a flat 12x12 plate one pixel thick, centered on the chest's front, hinged on the lid so it follows the lid
- * animation. Its south face carries the augment's design (the texture sheet is 32x32 and the face sits at 14,1).
+ * The augment overlay: a flat 4x4 plate one pixel thick on the top of the lid in its right back corner (seen from the front), hinged on
+ * the lid so it follows the lid animation. Its top face carries the augment's design: the layer is 64x64 and the texture sheet 192x192,
+ * so the 12x12 design is drawn at a third of a chest pixel per design pixel, and the face sits at 12,0 of the sheet.
  */
 public class AugmentPlateModel extends Model<Float> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(ModContent.id("augment_plate"), "main");
@@ -27,9 +28,9 @@ public class AugmentPlateModel extends Model<Float> {
     public static LayerDefinition createLayer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        // Pivot like the chest's lid (y 9, z 1). The box spans x 2..14 and, in the world, y 1..13: the middle of the 14 pixel high front.
-        root.addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0).addBox(2.0F, -8.0F, 14.0F, 12.0F, 12.0F, 1.0F), PartPose.offset(0.0F, 9.0F, 1.0F));
-        return LayerDefinition.create(mesh, 32, 32);
+        // Pivot like the chest's lid (y 9, z 1). The box sits on the lid top (world y 14), x 10..14 and z 2..6 (right and back).
+        root.addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0).addBox(10.0F, 5.0F, 1.0F, 4.0F, 1.0F, 4.0F), PartPose.offset(0.0F, 9.0F, 1.0F));
+        return LayerDefinition.create(mesh, 64, 64);
     }
 
     @Override

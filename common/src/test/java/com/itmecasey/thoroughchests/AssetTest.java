@@ -62,21 +62,21 @@ class AssetTest {
                 assertTrue(exists("items/" + name + ".json"), name);
                 assertTrue(exists("lang/en_us.json"));
                 BufferedImage sheet = image("textures/entity/chest/overlay_" + name + ".png");
-                assertEquals(32, sheet.getWidth(), name);
-                assertEquals(32, sheet.getHeight(), name);
+                assertEquals(192, sheet.getWidth(), name);
+                assertEquals(192, sheet.getHeight(), name);
             }
         }
     }
 
     @Test
-    void overlayArtSitsOnTheFrontFaceOfThePlateAndNowhereElse() throws IOException {
+    void overlayArtSitsOnTheTopFaceOfThePlateAndNowhereElse() throws IOException {
         for (Augment a : Augment.values()) {
             for (int l = 1; l <= a.maxLevel(); l++) {
                 BufferedImage sheet = image("textures/entity/chest/overlay_" + a.itemName(l) + ".png");
                 int inside = 0;
-                for (int y = 0; y < 32; y++) {
-                    for (int x = 0; x < 32; x++) {
-                        boolean front = x >= 14 && x < 26 && y >= 1 && y < 13;
+                for (int y = 0; y < 192; y++) {
+                    for (int x = 0; x < 192; x++) {
+                        boolean front = x >= 12 && x < 24 && y >= 0 && y < 12;
                         if (alpha(sheet, x, y) > 0) {
                             assertTrue(front, a.itemName(l) + " has a pixel outside the front face at " + x + "," + y);
                             inside++;
@@ -89,12 +89,12 @@ class AssetTest {
     }
 
     @Test
-    void overlayIsCenteredOnTheFrontFace() throws IOException {
+    void overlayIsCenteredOnItsFace() throws IOException {
         for (Augment a : Augment.values()) {
             BufferedImage sheet = image("textures/entity/chest/overlay_" + a.itemName(1) + ".png");
-            int minX = 99, maxX = -1, minY = 99, maxY = -1;
-            for (int y = 0; y < 32; y++) {
-                for (int x = 0; x < 32; x++) {
+            int minX = 999, maxX = -1, minY = 999, maxY = -1;
+            for (int y = 0; y < 192; y++) {
+                for (int x = 0; x < 192; x++) {
                     if (alpha(sheet, x, y) > 0) {
                         minX = Math.min(minX, x);
                         maxX = Math.max(maxX, x);
@@ -103,10 +103,10 @@ class AssetTest {
                     }
                 }
             }
-            int left = minX - 14;
-            int right = 25 - maxX;
-            int top = minY - 1;
-            int bottom = 12 - maxY;
+            int left = minX - 12;
+            int right = 23 - maxX;
+            int top = minY;
+            int bottom = 11 - maxY;
             assertTrue(Math.abs(left - right) <= 1, a + " is off center horizontally: " + left + " vs " + right);
             assertTrue(Math.abs(top - bottom) <= 1, a + " is off center vertically: " + top + " vs " + bottom);
         }

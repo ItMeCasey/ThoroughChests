@@ -2,7 +2,7 @@
 
 Chests with big scrolling inventories, five levels from copper to netherite, upgrade cards, and augments that compact, smelt, attract, feed and void items. For Minecraft on Forge and NeoForge (26.1.2, 26.2, 26.3), on both the client and the server.
 
-Docs: https://itmecasey.com/wiki/thoroughchests/. Listing text: [`curseforge/DESCRIPTION.md`](curseforge/DESCRIPTION.md). Design: [`docs/DESIGN.md`](docs/DESIGN.md).
+CurseForge project 1804333. Docs: https://itmecasey.com/wiki/thoroughchests/. Listing text: [`curseforge/DESCRIPTION.md`](curseforge/DESCRIPTION.md). Design: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## What it adds
 

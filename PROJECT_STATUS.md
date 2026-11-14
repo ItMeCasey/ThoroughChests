@@ -57,6 +57,6 @@ Spend: none
 
 ## Release (Project Manager and Casey)
 - [ ] GitHub repository created (w:1)
-- [ ] CurseForge project created and id recorded (w:1)
+- [x] CurseForge project created and id recorded: 1804333 (w:1)
 - [ ] Push, CI green, tag 2026.11.1 and upload (w:2)
 - [ ] Wiki deployed (w:1)

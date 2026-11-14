@@ -270,19 +270,16 @@ public final class ShotTour {
         shoot("gui_locked", 30);
         then(2, () -> close());
         // Fitting: the same chest at other GUI scales.
-        then(6, () -> open(big));
         for (int sc : new int[] {1, 2, 4, 5}) {
-            then(10, () -> {
+            then(6, () -> {
                 Minecraft minecraft = Minecraft.getInstance();
-                var window = minecraft.getWindow();
-                window.setGuiScale(window.calculateScale(sc, minecraft.isEnforceUnicode()));
-                if (minecraft.gui.screen() != null) {
-                    minecraft.gui.screen().resize(window.getGuiScaledWidth(), window.getGuiScaledHeight());
-                }
+                minecraft.options.guiScale().set(sc);
+                minecraft.resizeGui();
             });
-            shoot("gui_scale_" + sc, 60);
+            then(6, () -> open(big));
+            shoot("gui_scale_" + sc, 90);
+            then(2, () -> close());
         }
-        then(2, () -> close());
         then(20, ShotTour::finish);
     }
 

@@ -35,15 +35,11 @@ public class TcChestRenderer implements BlockEntityRenderer<TcChestBlockEntity, 
 
     private final SpriteGetter sprites;
     private final ChestModel model;
-    /** The same chest model without its latch, used when an augment overlay takes the latch's place. */
-    private final ChestModel latchless;
     private final AugmentPlateModel plate;
 
     public TcChestRenderer(BlockEntityRendererProvider.Context context) {
         this.sprites = context.sprites();
         this.model = new ChestModel(context.bakeLayer(ModelLayers.CHEST));
-        this.latchless = new ChestModel(context.bakeLayer(ModelLayers.CHEST));
-        this.latchless.root().getChild("lock").visible = false;
         this.plate = new AugmentPlateModel(context.bakeLayer(AugmentPlateModel.LAYER));
     }
 
@@ -70,7 +66,7 @@ public class TcChestRenderer implements BlockEntityRenderer<TcChestBlockEntity, 
         open = 1.0F - open * open * open;
         SpriteId sprite = Sheets.CHEST_MAPPER.apply(ModContent.id(state.level.id()));
         boolean overlaid = !state.overlay.isEmpty();
-        collector.submitModel(overlaid ? latchless : model, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0);
+        collector.submitModel(model, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0);
         if (overlaid) {
             SpriteId face = Sheets.CHEST_MAPPER.apply(ModContent.id("overlay_" + state.overlay));
             collector.submitModel(plate, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, face, sprites, 0);
