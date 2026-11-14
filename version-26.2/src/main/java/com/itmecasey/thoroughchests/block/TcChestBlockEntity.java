@@ -64,6 +64,8 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
     private String ownerId;
     private String ownerName = "";
     private boolean keep;
+    /** On a client: the item name of the installed augment, sent by the server so the renderer can draw its overlay. */
+    private String clientOverlay = "";
     private int version;
     private long ticks;
     private final ChestLidController lid = new ChestLidController();
@@ -447,6 +449,7 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
             fire("augment_installed", "augment", now.augment().id(), "augment_level", now.level());
         }
         setChanged();
+        syncToClients();
     }
 
     private void resetAugmentState(boolean removed) {
@@ -467,6 +470,30 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         if (!pendingOutput.isEmpty()) {
             insertStack(pendingOutput, false);
         }
+    }
+
+    /** Registry name of the installed augment's item (the overlay texture is named after it), or empty. */
+    public String overlayName() {
+        AugmentRules.Installed i = installedAugment();
+        return i != null ? i.augment().itemName(i.level()) : clientOverlay;
+    }
+
+    private void syncToClients() {
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putString("overlay", overlayName());
+        return tag;
+    }
+
+    @Override
+    public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 
     public boolean augmentEnabled() {
@@ -649,6 +676,7 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         ownerId = other.ownerId;
         ownerName = other.ownerName;
         other.items = NonNullList.withSize(0, ItemStack.EMPTY);
+        syncToClients();
     }
 
     private static void copy(SimpleContainer from, SimpleContainer to) {
@@ -700,6 +728,7 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+        clientOverlay = input.getStringOr("overlay", "");
         int highest = -1;
         for (net.minecraft.world.ItemStackWithSlot s : input.listOrEmpty("Items", net.minecraft.world.ItemStackWithSlot.CODEC)) {
             highest = Math.max(highest, s.slot());

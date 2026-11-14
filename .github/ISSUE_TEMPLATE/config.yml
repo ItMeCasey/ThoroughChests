@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: How Thorough Chests works and what it covers
+    url: https://itmecasey.com/wiki/thoroughchests/
+    about: The chest levels, upgrade cards, every augment, the config file and the scripting API. Read this first.
+  - name: Troubleshooting
+    url: https://itmecasey.com/wiki/thoroughchests/?p=troubleshooting
+    about: Locked chests, augments that do nothing and automation that skips a chest.

@@ -496,7 +496,7 @@ public final class SelfTest {
     }
 
     private static Cow cow(BlockPos at) {
-        Cow c = net.minecraft.world.entity.EntityTypes.COW.create(level, EntitySpawnReason.COMMAND);
+        Cow c = net.minecraft.world.entity.EntityType.COW.create(level, EntitySpawnReason.COMMAND);
         c.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         level.addFreshEntity(c);
         return c;

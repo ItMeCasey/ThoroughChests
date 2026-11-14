@@ -19,6 +19,8 @@ import zipfile
 
 from PIL import Image
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "common", "src", "main", "resources", "assets", "thoroughchests", "textures")
 LEVELS = ["copper", "iron", "gold", "diamond", "netherite"]
@@ -92,95 +94,6 @@ def frame_chest(base, src, tile_shift):
     return out
 
 
-def crop_center(img, size):
-    w, h = img.size
-    x = (w - size) // 2
-    y = (h - size) // 2
-    return img.crop((x, y, x + size, y + size))
-
-
-def rimmed_plate(src, x0, y0, w, h, canvas, shift=0):
-    px = canvas.load()
-    sp = src.load()
-    sw, sh = src.size
-    for y in range(y0, y0 + h):
-        for x in range(x0, x0 + w):
-            ring = min(x - x0, x0 + w - 1 - x, y - y0, y0 + h - 1 - y)
-            c = sp[(x + shift) % sw, (y + shift) % sh][:3]
-            if ring == 0:
-                c = shade(c, 0.45)
-            elif ring == 1:
-                c = shade(c, 1.1 if (x - x0 == 1 or y - y0 == 1) else 0.85)
-            px[x, y] = (c[0], c[1], c[2], 255)
-
-
-def card(vanilla, level):
-    canvas = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rimmed_plate(vanilla.get(MATERIAL[level]), 3, 1, 10, 14, canvas)
-    paper = vanilla.get("item/paper")
-    pp = paper.load()
-    cp = canvas.load()
-    colors = [pp[x, y][:3] for x in range(16) for y in range(16) if pp[x, y][3] > 0]
-    colors.sort(key=sum)
-    light = colors[int(len(colors) * 0.9)]
-    for y in range(3, 13):
-        for x in range(5, 11):
-            cp[x, y] = (light[0], light[1], light[2], 255)
-    arrow = shade(vanilla.get(MATERIAL[level]).getpixel((4, 4)), 0.55)
-    for (x, y) in [(7, 4), (8, 4), (6, 5), (9, 5), (5, 6), (10, 6), (7, 6), (8, 6), (7, 7), (8, 7), (7, 8), (8, 8), (7, 9), (8, 9), (7, 10), (8, 10)]:
-        cp[x, y] = (arrow[0], arrow[1], arrow[2], 255)
-    return canvas
-
-
-HEARTS = {
-    "compact": "block/crafting_table_front",
-    "furnace": "block/furnace_front",
-    "blast_furnace": "block/blast_furnace_front",
-    "magnet": "block/lodestone_side",
-    "feeder": "block/hay_block_side",
-    "void": "block/obsidian",
-}
-RIMS = {1: "block/iron_block", 2: "block/gold_block", 3: "block/diamond_block"}
-
-
-def augment(vanilla, kind, level):
-    canvas = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rimmed_plate(vanilla.get(RIMS[level]), 2, 2, 12, 11, canvas, shift=level)
-    heart = crop_center(vanilla.get(HEARTS[kind]), 6)
-    cp = canvas.load()
-    hp = heart.load()
-    for y in range(6):
-        for x in range(6):
-            c = hp[x, y]
-            cp[5 + x, 4 + y] = (c[0], c[1], c[2], 255)
-    gold = vanilla.get("block/gold_block")
-    pips = [gold.getpixel((i * 3 % 16, i * 5 % 16))[:3] for i in range(3)]
-    # Level pips under the plate: one gold pixel pair per level.
-    for i in range(level):
-        for dx in range(2):
-            cp[4 + i * 3 + dx, 14] = (pips[i][0], pips[i][1], pips[i][2], 255)
-            cp[4 + i * 3 + dx, 13] = (pips[i][0], pips[i][1], pips[i][2], 255)
-    return canvas
-
-
-def lock(vanilla):
-    canvas = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    iron = vanilla.get("block/iron_block")
-    gold = vanilla.get("block/gold_block")
-    cp = canvas.load()
-    ip = iron.load()
-    # Shackle
-    for (x, y) in [(5, 2), (6, 1), (7, 1), (8, 1), (9, 1), (10, 2), (5, 3), (10, 3), (5, 4), (10, 4), (5, 5), (10, 5)]:
-        c = ip[x % 16, y % 16][:3]
-        cp[x, y] = (c[0], c[1], c[2], 255)
-    # Body
-    rimmed_plate(gold, 3, 6, 10, 8, canvas, shift=2)
-    k = shade(gold.getpixel((2, 2)), 0.4)
-    for (x, y) in [(8, 8), (7, 9), (8, 9), (8, 10), (8, 11)]:
-        cp[x, y] = (k[0], k[1], k[2], 255)
-    return canvas
-
-
 def save(img, *parts):
     path = os.path.join(OUT, *parts)
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -188,41 +101,60 @@ def save(img, *parts):
     return path
 
 
+ITEM_TEXTURES = ["block/furnace_front_on", "block/blast_furnace_front_on", "block/crafting_table_top", "block/iron_block", "block/gold_block",
+                 "block/diamond_block", "block/netherite_block", "block/redstone_block", "block/obsidian"]
+AUGMENT_KINDS = (("compact", 1), ("furnace", 3), ("blast_furnace", 3), ("magnet", 3), ("feeder", 3), ("void", 1))
+
+
+def item_name(kind, maxlevel, level):
+    return f"{kind}_augment" if maxlevel == 1 else f"{kind}_augment_{level}"
+
+
+def review_sheet(entries, path):
+    """A sheet with every icon at 1x and at 8x, so they can be looked at one by one."""
+    cols = 8
+    rows = (len(entries) + cols - 1) // cols
+    sheet = Image.new("RGBA", (cols * 140, rows * 150), (72, 72, 80, 255))
+    for i, (name, icon) in enumerate(entries):
+        x = (i % cols) * 140
+        y = (i // cols) * 150
+        big = icon.resize((icon.width * 8, icon.height * 8), Image.NEAREST)
+        sheet.alpha_composite(big, (x + 6, y + 4))
+        sheet.alpha_composite(icon, (x + 6, y + 4 + 16 * 8 + 4))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    sheet.save(path)
+
+
 def main():
+    import item_art
     vanilla = Vanilla(sys.argv[1] if len(sys.argv) > 1 else None)
     base = vanilla.get("entity/chest/normal")
-    sheet = Image.new("RGBA", (64 * 5 + 16 * 14 + 40, 64), (60, 60, 60, 255))
-    sx = 0
     for i, level in enumerate(LEVELS):
-        img = frame_chest(base, vanilla.get(FRAME_SOURCE[level]), i + 1)
-        save(img, "entity", "chest", f"{level}.png")
-        sheet.paste(img, (sx, 0))
-        sx += 64
-    icons = []
-    for level in LEVELS[1:]:
-        img = card(vanilla, level)
-        save(img, "item", f"{level}_upgrade_card.png")
-        icons.append(img)
-    for kind, maxlevel in (("compact", 1), ("furnace", 3), ("blast_furnace", 3), ("magnet", 3), ("feeder", 3), ("void", 1)):
+        save(frame_chest(base, vanilla.get(FRAME_SOURCE[level]), i + 1), "entity", "chest", f"{level}.png")
+    v = {name.split("/")[-1]: vanilla.get(name) for name in ITEM_TEXTURES}
+    entries = []
+    for tier in LEVELS[1:]:
+        icon = item_art.card(v, tier)
+        save(icon, "item", f"{tier}_upgrade_card.png")
+        entries.append((f"{tier}_upgrade_card", icon))
+    for kind, maxlevel in AUGMENT_KINDS:
         for lv in range(1, maxlevel + 1):
-            name = f"{kind}_augment" if maxlevel == 1 else f"{kind}_augment_{lv}"
-            img = augment(vanilla, kind, lv)
-            save(img, "item", f"{name}.png")
-            icons.append(img)
-    img = lock(vanilla)
-    save(img, "item", "chest_lock.png")
-    icons.append(img)
-    for n, icon in enumerate(icons[: 15]):
-        sheet.paste(icon, (sx + n * 16 // 1 if False else sx + (n % 15) * 16, 0))
-    # A preview of everything at 4x for a quick look (not shipped).
-    preview = os.path.join(ROOT, "docs", "frames", "textures_preview.png")
-    os.makedirs(os.path.dirname(preview), exist_ok=True)
-    full = Image.new("RGBA", (64 * 5, 64 + 16 * 2), (60, 60, 60, 255))
+            name = item_name(kind, maxlevel, lv)
+            icon = item_art.augment_icon(v, kind, lv)
+            save(icon, "item", f"{name}.png")
+            entries.append((name, icon))
+            # The chest overlay: the same 12x12 design on the south face of the 12x12x1 plate model (its UV box puts that face at 14,1 of a 32x32 sheet).
+            sheet = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+            sheet.alpha_composite(item_art.augment_canvas(v, kind, lv), (14, 1))
+            save(sheet, "entity", "chest", f"overlay_{name}.png")
+    lock = item_art.lock(v)
+    save(lock, "item", "chest_lock.png")
+    entries.append(("chest_lock", lock))
+    review_sheet(entries, os.path.join(ROOT, "docs", "frames", "textures_review.png"))
+    chests = Image.new("RGBA", (64 * 5, 64), (60, 60, 60, 255))
     for n, level in enumerate(LEVELS):
-        full.paste(Image.open(os.path.join(OUT, "entity", "chest", f"{level}.png")), (n * 64, 0))
-    for n, icon in enumerate(icons):
-        full.paste(icon, ((n % 20) * 16, 64 + (n // 20) * 16))
-    full.resize((full.width * 3, full.height * 3), Image.NEAREST).save(preview)
+        chests.paste(Image.open(os.path.join(OUT, "entity", "chest", f"{level}.png")), (n * 64, 0))
+    chests.resize((chests.width * 3, chests.height * 3), Image.NEAREST).save(os.path.join(ROOT, "docs", "frames", "textures_chests.png"))
     print("textures written to", OUT)
 
 

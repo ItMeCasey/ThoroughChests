@@ -1,0 +1,44 @@
+name: Augment problem
+description: An augment does something different from what the wiki and config say.
+title: "[Augment] "
+labels: ["bug"]
+body:
+  - type: input
+    id: augment
+    attributes:
+      label: Which augment and level
+      placeholder: Furnace augment 2, Magnet augment 1
+    validations:
+      required: true
+  - type: textarea
+    id: shown
+    attributes:
+      label: What happens
+      description: What the chest does, with the chest level and what is inside it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and why
+      description: The number from the wiki or your config file.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Changes to config/thoroughchests.properties
+      description: Only the lines you changed, if any.
+  - type: input
+    id: version
+    attributes:
+      label: Thorough Chests version
+    validations:
+      required: true
+  - type: input
+    id: minecraft
+    attributes:
+      label: Minecraft and loader versions
+      placeholder: Minecraft 26.2, NeoForge ...
+    validations:
+      required: true

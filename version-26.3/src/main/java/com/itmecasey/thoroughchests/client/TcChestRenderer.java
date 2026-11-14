@@ -29,14 +29,22 @@ public class TcChestRenderer implements BlockEntityRenderer<TcChestBlockEntity, 
         public Direction facing = Direction.SOUTH;
         public float open;
         public ChestLevel level = ChestLevel.COPPER;
+        /** Item name of the installed augment, or empty. */
+        public String overlay = "";
     }
 
     private final SpriteGetter sprites;
     private final ChestModel model;
+    /** The same chest model without its latch, used when an augment overlay takes the latch's place. */
+    private final ChestModel latchless;
+    private final AugmentPlateModel plate;
 
     public TcChestRenderer(BlockEntityRendererProvider.Context context) {
         this.sprites = context.sprites();
         this.model = new ChestModel(context.bakeLayer(ModelLayers.CHEST));
+        this.latchless = new ChestModel(context.bakeLayer(ModelLayers.CHEST));
+        this.latchless.root().getChild("lock").visible = false;
+        this.plate = new AugmentPlateModel(context.bakeLayer(AugmentPlateModel.LAYER));
     }
 
     @Override
@@ -51,6 +59,7 @@ public class TcChestRenderer implements BlockEntityRenderer<TcChestBlockEntity, 
         state.facing = chest.getBlockState().getValue(TcChestBlock.FACING);
         state.open = chest.getOpenNess(partialTicks);
         state.level = chest.level();
+        state.overlay = chest.overlayName();
     }
 
     @Override
@@ -60,7 +69,12 @@ public class TcChestRenderer implements BlockEntityRenderer<TcChestBlockEntity, 
         float open = 1.0F - state.open;
         open = 1.0F - open * open * open;
         SpriteId sprite = Sheets.CHEST_MAPPER.apply(ModContent.id(state.level.id()));
-        collector.submitModel(model, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0);
+        boolean overlaid = !state.overlay.isEmpty();
+        collector.submitModel(overlaid ? latchless : model, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, sprite, sprites, 0);
+        if (overlaid) {
+            SpriteId face = Sheets.CHEST_MAPPER.apply(ModContent.id("overlay_" + state.overlay));
+            collector.submitModel(plate, open, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, face, sprites, 0);
+        }
         poseStack.popPose();
     }
 }

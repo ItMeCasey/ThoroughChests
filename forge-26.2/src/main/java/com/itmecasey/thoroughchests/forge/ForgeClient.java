@@ -16,6 +16,7 @@ final class ForgeClient {
     static void install(FMLJavaModLoadingContext context) {
         FMLClientSetupEvent.getBus(context.getModBusGroup()).addListener(ForgeClient::setup);
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(ForgeClient::renderers);
+        EntityRenderersEvent.RegisterLayerDefinitions.BUS.addListener(ForgeClient::layers);
     }
 
     private static void setup(FMLClientSetupEvent event) {
@@ -24,6 +25,10 @@ final class ForgeClient {
                 MenuScreens.register(type, TcChestScreen::new);
             }
         });
+    }
+
+    private static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(com.itmecasey.thoroughchests.client.AugmentPlateModel.LAYER, com.itmecasey.thoroughchests.client.AugmentPlateModel::createLayer);
     }
 
     private static void renderers(EntityRenderersEvent.RegisterRenderers event) {

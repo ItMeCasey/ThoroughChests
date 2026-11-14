@@ -24,6 +24,11 @@ public final class NeoForgeClient {
     }
 
     @SubscribeEvent
+    public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(com.itmecasey.thoroughchests.client.AugmentPlateModel.LAYER, com.itmecasey.thoroughchests.client.AugmentPlateModel::createLayer);
+    }
+
+    @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModContent.CHEST, TcChestRenderer::new);
     }

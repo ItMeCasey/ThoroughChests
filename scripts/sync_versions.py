@@ -41,7 +41,7 @@ def v263(text):
     text = re.sub(r"\n    private static final MapCodec<[^\n]*\n", "\n", text)
     text = re.sub(r"\n    @Override\n    protected MapCodec<[^\n]*\{\n        return CODEC;\n    \}\n", "\n", text)
     text = text.replace("import com.mojang.serialization.MapCodec;\n", "")
-    text = text.replace(", 0, state.breakProgress);", ", 0);")
+    text = text.replace(", 0, state.breakProgress);", ", 0);").replace(", 0, null);", ", 0);")
     if "player.drop(out, false);" in text:
         text = text.replace("player.drop(out, false);", "Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), out);")
         text = text.replace("import net.minecraft.world.Container;" + chr(10), "import net.minecraft.world.Container;" + chr(10) + "import net.minecraft.world.Containers;" + chr(10), 1)
@@ -49,6 +49,7 @@ def v263(text):
 
 
 def v2612(text):
+    text = text.replace("net.minecraft.world.entity.EntityTypes.COW", "net.minecraft.world.entity.EntityType.COW")
     text = text.replace("minecraft.gui.overlay()", "minecraft.getOverlay()").replace("minecraft.gui.screen()", "minecraft.screen")
     text = text.replace("registries -> registries.lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET).getOrThrow(WorldPresets.FLAT).value().createWorldDimensions()",
                         "WorldPresets::createFlatWorldDimensions")
