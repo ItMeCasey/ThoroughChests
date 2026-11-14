@@ -1,78 +1,74 @@
 """Runs the dev screenshot tour on a real game client for one layer and collects the screenshots.
 
-Usage: python scripts/client_tour.py <layer> [<layer> ...]     e.g. neoforge-1.21.1 forge-26.2
+Usage: python scripts/client_tour.py <layer> [<layer> ...]     e.g. neoforge-26.2 forge-26.2
 
-Starts `gradlew runClient` with THOROUGHCHESTS_SHOTS set, moves the game window to DISPLAY6 (the right-hand monitor) as soon as it
-exists, waits for the tour to finish (it quits the game itself), and prints the screenshot names. The game is muted and the
-tour lets go of the mouse, so nothing needs a person at the keyboard. Screenshots land in <layer>/run/screenshots.
+Starts `gradlew runClient -PdevTools` (through the Gradle slot wrapper) on the hidden Windows desktop of launch-isolated.ps1, so no window,
+focus or cursor change ever reaches the real desktop, with THOROUGHCHESTS_SHOTS set. The tour quits the game itself when it is done.
+Screenshots land in <layer>/run/screenshots and are copied to docs/frames/<layer>/.
 """
 import os
 import re
 import shutil
 import subprocess
 import sys
-import threading
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PLACE = r"C:\Users\casey\.claude\tools\place-window.ps1"
-TIMEOUT = 600
+LAUNCH = r"C:\Users\casey\.claude\tools\launch-isolated.ps1"
+SLOT = "C:/Users/casey/.claude/tools/gradle-slot.sh"
+TIMEOUT = 900
 OPTIONS = (
-    "soundCategory_master:0.0\nmusic:0.0\npauseOnLostFocus:false\nonboardAccessibility:false\n"
-    "skipMultiplayerWarning:true\njoinedFirstServer:true\ntutorialStep:none\nfullscreen:false\nguiScale:3\nlang:en_us\n"
+    "pauseOnLostFocus:false\nonboardAccessibility:false\nskipMultiplayerWarning:true\njoinedFirstServer:true\ntutorialStep:none\n"
+    "fullscreen:false\nguiScale:3\nlang:en_us\n"
 )
 
 
-def tour(layer):
+def tour(layer, viewers=None):
     folder = ROOT / layer
     run = folder / "run"
     run.mkdir(exist_ok=True)
     (run / "options.txt").write_text(OPTIONS)
-    saved = run / "config" / "thoroughchests-client.properties"
-    if saved.exists():
-        saved.unlink()  # the tour clicks through the screen settings, so it starts from the defaults
     shots = run / "screenshots"
     if shots.exists():
         shutil.rmtree(shots)
-    env = dict(os.environ, THOROUGHCHESTS_SHOTS=os.environ.get("THOROUGHCHESTS_MODE", "1"))
-    log = []
-    proc = subprocess.Popen(["cmd", "/c", str(folder / "gradlew.bat"), "runClient", "--no-daemon", "-q", "-PdevTools"] + (["-Pviewers=" + os.environ["THOROUGHCHESTS_VIEWERS"].replace("+", ",")] if os.environ.get("THOROUGHCHESTS_VIEWERS") else []) + (["-PbeiJar=" + os.environ["THOROUGHCHESTS_BEI_JAR"]] if os.environ.get("THOROUGHCHESTS_BEI_JAR") else []), cwd=folder,
-                            env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
-
-    def pump():
-        for line in proc.stdout:
-            log.append(line.rstrip())
-
-    threading.Thread(target=pump, daemon=True).start()
-
-    def place():
-        # The window title starts with "Minecraft"; this waits up to two minutes for it and moves it to DISPLAY6.
-        # Only Java windows count: other windows (a browser tab about Minecraft) must never be moved.
-        subprocess.run(["powershell", "-NoProfile", "-File", PLACE, "-ProcessName", "java*", "-Match", "Minecraft",
-                        "-Wait", "180"],
-                       capture_output=True)
-
-    threading.Thread(target=place, daemon=True).start()
+    latest = run / "logs" / "latest.log"
+    if latest.exists():
+        latest.unlink()
+    gradle = f"bash {SLOT} ./gradlew runClient --no-daemon -q -PdevTools" + (f" -Pviewers={viewers}" if viewers else "")
+    command = f"set THOROUGHCHESTS_SHOTS=1&& {gradle}"
     start = time.time()
-    while proc.poll() is None and time.time() - start < TIMEOUT:
-        time.sleep(2)
-    timed_out = proc.poll() is None
-    if timed_out:
-        subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)], capture_output=True)
-    (run / "client_tour.log").write_text("\n".join(log), encoding="utf-8")
+    subprocess.run(["powershell", "-NoProfile", "-File", LAUNCH, "-Run", "-WorkDir", str(folder), "-Command", command],
+                   capture_output=True, text=True)
+    done = False
+    while time.time() - start < TIMEOUT:
+        time.sleep(5)
+        if latest.exists():
+            text = latest.read_text(encoding="utf-8", errors="replace")
+            if "THOROUGHCHESTS-SHOTS DONE" in text:
+                done = True
+                break
+    time.sleep(8)
+    subprocess.run(["powershell", "-NoProfile", "-File", LAUNCH, "-Kill", "-WorkDir", str(folder)], capture_output=True, text=True)
+    text = latest.read_text(encoding="utf-8", errors="replace") if latest.exists() else ""
     names = sorted(p.name for p in shots.glob("*.png")) if shots.exists() else []
-    done = any("THOROUGHCHESTS-SHOTS DONE" in line for line in log)
-    errors = [l for l in log if re.search(r"thoroughchests.*(Exception|Error)|ModLoadingException|Crash report saved", l, re.I)]
-    status = "TOUR PASS" if done and not timed_out and not errors else "TOUR FAIL"
-    detail = "" if status == "TOUR PASS" else f": done={done} timed_out={timed_out} first_error={errors[:1]}"
+    target = ROOT / "docs" / "frames" / layer
+    if names:
+        target.mkdir(parents=True, exist_ok=True)
+        for p in shots.glob("*.png"):
+            shutil.copyfile(p, target / p.name.replace("thoroughchests_", ""))
+    errors = [l for l in text.splitlines() if re.search(r"THOROUGHCHESTS-SHOTS failed|thoroughchests.*(Exception|Error)|ModLoadingException|Crash report saved", l, re.I)]
+    status = "TOUR PASS" if done and not errors else "TOUR FAIL"
+    detail = "" if status == "TOUR PASS" else f": done={done} first_error={errors[:1]}"
     return f"{status} {layer} ({len(names)} screenshots, {int(time.time() - start)}s){detail}"
 
 
 if __name__ == "__main__":
     bad = 0
-    for layer in sys.argv[1:]:
-        result = tour(layer)
+    args = [a for a in sys.argv[1:] if not a.startswith("--viewers=")]
+    viewers = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--viewers=")), None)
+    for layer in args:
+        result = tour(layer, viewers)
         print(result, flush=True)
         bad += result.startswith("TOUR FAIL")
     sys.exit(1 if bad else 0)

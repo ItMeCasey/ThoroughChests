@@ -6,7 +6,7 @@ Everything needed to fill in the CurseForge project form. Files are in `branding
 
 | Field | CurseForge |
 |---|---|
-| Project ID | not created yet (Casey creates the project; record the id here and in `.github/scripts/publish_curseforge.py`) |
+| Project ID | 1804333 (slug `thorough-chests`; also set in `.github/scripts/publish_curseforge.py`) |
 | Name | Thorough Chests |
 | Slug / URL | `thoroughchests` |
 | Mod id | `thoroughchests` |
