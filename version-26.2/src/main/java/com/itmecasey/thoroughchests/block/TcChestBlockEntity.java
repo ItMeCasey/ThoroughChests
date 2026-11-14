@@ -7,7 +7,6 @@ import com.itmecasey.thoroughchests.Fullness;
 import com.itmecasey.thoroughchests.FurnaceSim;
 import com.itmecasey.thoroughchests.LockRule;
 import com.itmecasey.thoroughchests.ModContent;
-import com.itmecasey.thoroughchests.RedstoneMode;
 import com.itmecasey.thoroughchests.ScriptEvents;
 import com.itmecasey.thoroughchests.Settings;
 import com.itmecasey.thoroughchests.augment.Augments;
@@ -44,22 +43,18 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-/** The chest's inventory, augment, lock, filter and settings, with the vanilla open counting and lid animation. */
+/** The chest's inventory, augment and lock, with the vanilla open counting and lid animation. */
 public class TcChestBlockEntity extends BlockEntity implements Container, LidBlockEntity {
     private static final int EVENT_OPEN_COUNT = 1;
 
     private NonNullList<ItemStack> items;
-    /** One-slot containers for the augment and the lock, and nine ghost slots for the filter. */
+    /** One-slot containers for the augment and the lock. */
     public final SimpleContainer augmentSlot = new Slots(1);
     public final SimpleContainer lockSlot = new Slots(1);
-    public final SimpleContainer filterSlots = new Slots(9);
     public final FurnaceSim sim = new FurnaceSim();
     private ItemStack cookInput = ItemStack.EMPTY;
     private ItemStack cookResult = ItemStack.EMPTY;
     private ItemStack pendingOutput = ItemStack.EMPTY;
-    private boolean filterWhitelist;
-    private boolean augmentEnabled = true;
-    private RedstoneMode redstone = RedstoneMode.IGNORE;
     @Nullable
     private String ownerId;
     private String ownerName = "";
@@ -367,6 +362,34 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         return i == null ? 0 : i.level();
     }
 
+    /** Gives the installed augment back to the player (sneak-use with an empty hand). Returns whether there was one. */
+    public boolean takeAugment(Player player) {
+        ItemStack stack = augmentSlot.getItem(0);
+        if (stack.isEmpty()) {
+            return false;
+        }
+        augmentSlot.setItem(0, ItemStack.EMPTY);
+        augmentChanged(false);
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
+        return true;
+    }
+
+    /** Gives the lock back to the player (sneak-use with an empty hand on a chest without an augment). Returns whether there was one. */
+    public boolean takeLock(Player player) {
+        ItemStack stack = lockSlot.getItem(0);
+        if (stack.isEmpty()) {
+            return false;
+        }
+        lockSlot.setItem(0, ItemStack.EMPTY);
+        lockRemoved();
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
+        return true;
+    }
+
     public ItemStack augmentStack() {
         return augmentSlot.getItem(0);
     }
@@ -396,7 +419,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
             fire("augment_removed");
         } else {
             if (!upgrade) {
-                augmentEnabled = now.augment() != Augment.VOID || Settings.getBool("void.enabled_by_default");
                 resetAugmentState(false);
             }
             fire("augment_installed", "augment", now.augment().id(), "augment_level", now.level());
@@ -449,59 +471,8 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public boolean augmentEnabled() {
-        return augmentEnabled;
-    }
-
-    public void setAugmentEnabled(boolean on) {
-        augmentEnabled = on;
-        setChanged();
-    }
-
-    public RedstoneMode redstone() {
-        return redstone;
-    }
-
-    public void setRedstone(RedstoneMode mode) {
-        redstone = mode;
-        setChanged();
-    }
-
-    public boolean filterWhitelist() {
-        return filterWhitelist;
-    }
-
-    public void setFilterWhitelist(boolean on) {
-        filterWhitelist = on;
-        setChanged();
-    }
-
-    /** Whether the chest's filter lets this stack through. An empty filter lets everything through. */
-    public boolean filterAllows(ItemStack stack) {
-        boolean any = false;
-        boolean listed = false;
-        for (int i = 0; i < filterSlots.getContainerSize(); i++) {
-            ItemStack f = filterSlots.getItem(i);
-            if (!f.isEmpty()) {
-                any = true;
-                if (f.is(stack.getItem())) {
-                    listed = true;
-                }
-            }
-        }
-        return !any || listed == filterWhitelist;
-    }
-
-    /** Whether the augment would act now: installed, switched on and allowed by the redstone mode. */
-    public boolean augmentActive() {
-        if (augment() == null || !augmentEnabled) {
-            return false;
-        }
-        return redstone.active(level == null || level.hasNeighborSignal(worldPosition));
-    }
-
     public boolean voidActive() {
-        return augment() == Augment.VOID && augmentActive();
+        return augment() == Augment.VOID;
     }
 
     public ItemStack cookInput() {
@@ -559,7 +530,7 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
     public static void serverTick(Level world, BlockPos pos, BlockState state, TcChestBlockEntity chest) {
         chest.ticks++;
         com.itmecasey.thoroughchests.script.ScriptHost.touch(world);
-        if (chest.augment() != null && world instanceof ServerLevel server && chest.augmentActive()) {
+        if (chest.augment() != null && world instanceof ServerLevel server) {
             Augments.tick(chest, server);
         }
     }
@@ -618,14 +589,10 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         }
         copy(other.augmentSlot, augmentSlot);
         copy(other.lockSlot, lockSlot);
-        copy(other.filterSlots, filterSlots);
         sim.load(other.sim.burnBank(), other.sim.cookLeft(), other.sim.cooking());
         cookInput = other.cookInput;
         cookResult = other.cookResult;
         pendingOutput = other.pendingOutput;
-        filterWhitelist = other.filterWhitelist;
-        augmentEnabled = other.augmentEnabled;
-        redstone = other.redstone;
         ownerId = other.ownerId;
         ownerName = other.ownerName;
         other.items = NonNullList.withSize(0, ItemStack.EMPTY);
@@ -659,15 +626,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         ContainerHelper.saveAllItems(output, items);
         output.store("augment", ItemStack.OPTIONAL_CODEC, augmentSlot.getItem(0));
         output.store("lock", ItemStack.OPTIONAL_CODEC, lockSlot.getItem(0));
-        var filterOut = output.list("filter", net.minecraft.world.ItemStackWithSlot.CODEC);
-        for (int i = 0; i < filterSlots.getContainerSize(); i++) {
-            if (!filterSlots.getItem(i).isEmpty()) {
-                filterOut.add(new net.minecraft.world.ItemStackWithSlot(i, filterSlots.getItem(i)));
-            }
-        }
-        output.putBoolean("filter_whitelist", filterWhitelist);
-        output.putBoolean("augment_enabled", augmentEnabled);
-        output.putInt("redstone", redstone.ordinal());
         output.putString("owner_id", ownerId == null ? "" : ownerId);
         output.putString("owner_name", ownerName);
         output.putDouble("burn", sim.burnBank());
@@ -694,15 +652,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         }
         augmentSlot.setItem(0, input.read("augment", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
         lockSlot.setItem(0, input.read("lock", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
-        filterSlots.clearContent();
-        for (net.minecraft.world.ItemStackWithSlot s : input.listOrEmpty("filter", net.minecraft.world.ItemStackWithSlot.CODEC)) {
-            if (s.slot() >= 0 && s.slot() < filterSlots.getContainerSize()) {
-                filterSlots.setItem(s.slot(), s.stack());
-            }
-        }
-        filterWhitelist = input.getBooleanOr("filter_whitelist", false);
-        augmentEnabled = input.getBooleanOr("augment_enabled", true);
-        redstone = RedstoneMode.byOrdinal(input.getIntOr("redstone", 0));
         String owner = input.getStringOr("owner_id", "");
         ownerId = owner.isEmpty() ? null : owner;
         ownerName = input.getStringOr("owner_name", "");

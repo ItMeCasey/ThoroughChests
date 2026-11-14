@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.StringReader;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,8 +26,10 @@ class ChestRulesTest {
     }
 
     @Test
-    void slotCountsComeFromSettingsAndStayInRange() throws Exception {
-        Settings.load(new StringReader("level.gold.slots=90\nlevel.iron.slots=0\nlevel.copper.slots=100000\n"));
+    void slotCountsComeFromSettingsAndStayInRange() {
+        Settings.set("level.gold.slots", 90);
+        Settings.set("level.iron.slots", 0);
+        Settings.set("level.copper.slots", 100000);
         assertEquals(90, ChestLevel.GOLD.slots());
         assertEquals(1, ChestLevel.IRON.slots());
         assertEquals(ChestLevel.MAX_SLOTS, ChestLevel.COPPER.slots());
@@ -85,8 +85,6 @@ class ChestRulesTest {
         assertEquals("void_augment", Augment.VOID.itemName(1));
         assertEquals(3, Augment.MAGNET.maxLevel());
         assertEquals(Augment.BLAST_FURNACE, Augment.byId("blast_furnace"));
-        assertFalse(Augment.FURNACE.usesFilter());
-        assertTrue(Augment.FEEDER.usesFilter());
     }
 
     @Test
@@ -137,39 +135,6 @@ class ChestRulesTest {
     }
 
     @Test
-    void emptyFilterAllowsEverything() {
-        ItemFilter f = new ItemFilter();
-        assertTrue(f.allows("minecraft:dirt"));
-        f.setWhitelist(true);
-        assertTrue(f.allows("minecraft:dirt"));
-    }
-
-    @Test
-    void whitelistAndBlacklist() {
-        ItemFilter f = new ItemFilter();
-        f.setIds(List.of("minecraft:iron_ingot", "minecraft:gold_ingot"));
-        f.setWhitelist(true);
-        assertTrue(f.allows("minecraft:iron_ingot"));
-        assertFalse(f.allows("minecraft:dirt"));
-        f.toggleMode();
-        assertFalse(f.whitelist());
-        assertFalse(f.allows("minecraft:iron_ingot"));
-        assertTrue(f.allows("minecraft:dirt"));
-    }
-
-    @Test
-    void redstoneModes() {
-        assertTrue(RedstoneMode.IGNORE.active(true));
-        assertTrue(RedstoneMode.IGNORE.active(false));
-        assertTrue(RedstoneMode.WHEN_POWERED.active(true));
-        assertFalse(RedstoneMode.WHEN_POWERED.active(false));
-        assertFalse(RedstoneMode.WHEN_UNPOWERED.active(true));
-        assertTrue(RedstoneMode.WHEN_UNPOWERED.active(false));
-        assertEquals(RedstoneMode.IGNORE, RedstoneMode.WHEN_UNPOWERED.next());
-        assertEquals(RedstoneMode.IGNORE, RedstoneMode.byOrdinal(99));
-    }
-
-    @Test
     void comparatorSignalSpansTheWholeInventory() {
         assertEquals(0, Fullness.signal(0, 135, false));
         assertEquals(1, Fullness.signal(0.01F, 135, true));
@@ -209,7 +174,6 @@ class ChestRulesTest {
             assertTrue(Settings.getInt("feeder.range." + l) > 0);
             assertTrue(Settings.getInt("feeder.interval." + l) > 0);
         }
-        assertFalse(Settings.getBool("void.enabled_by_default"));
         Settings.set("magnet.radius.2", 20);
         assertEquals(20, Settings.getInt("magnet.radius.2"));
     }

@@ -1,15 +1,11 @@
 package com.itmecasey.thoroughchests.menu;
 
-import com.itmecasey.thoroughchests.Augment;
-import com.itmecasey.thoroughchests.AugmentRules;
 import com.itmecasey.thoroughchests.GuiFit;
 import com.itmecasey.thoroughchests.ModContent;
-import com.itmecasey.thoroughchests.RedstoneMode;
+import com.itmecasey.thoroughchests.ScriptEvents;
 import com.itmecasey.thoroughchests.Settings;
 import com.itmecasey.thoroughchests.Window;
 import com.itmecasey.thoroughchests.block.TcChestBlockEntity;
-import com.itmecasey.thoroughchests.item.AugmentItem;
-import com.itmecasey.thoroughchests.item.LockItem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +21,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
@@ -33,32 +28,22 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The chest menu: a window of {@code rows * 9} slots over the chest, the augment slot, the lock slot, nine filter ghost slots and the
- * player inventory. The server keeps the mapping from window slot to chest slot (scroll and search), so every click, shift-click and
- * drag is resolved against the real chest. Scroll, search and the toggles arrive as menu button ids.
+ * The chest menu: a window of {@code rows * 9} slots over the chest and the player inventory. The server keeps the mapping from window
+ * slot to chest slot (scroll and search), so every click, shift-click and drag is resolved against the real chest. Scroll, search and the
+ * window size arrive as menu button ids.
  */
 public class TcChestMenu extends AbstractContainerMenu {
     public static final int X = 13;
     public static final int WIDTH = 188;
-    public static final int BTN_TOGGLE = 3;
-    public static final int BTN_REDSTONE = 4;
-    public static final int BTN_FILTER_MODE = 5;
-    public static final int BTN_CLEAR_LINK = 6;
     public static final int BTN_CLEAR_QUERY = 7;
     public static final int BTN_BACKSPACE = 8;
     public static final int BTN_ROWS = 200;
     public static final int BTN_SCROLL = 1000;
     public static final int BTN_CHAR = 2000000;
     public static final int D_FILTERED = 0;
-    public static final int D_AUGMENT = 1;
-    public static final int D_LEVEL = 2;
-    public static final int D_ENABLED = 3;
-    public static final int D_REDSTONE = 4;
-    public static final int D_WHITELIST = 5;
-    public static final int D_LOCKED = 6;
-    public static final int D_USED = 7;
-    public static final int D_SLOTS = 8;
-    public static final int D_COUNT = 9;
+    public static final int D_USED = 1;
+    public static final int D_SLOTS = 2;
+    public static final int D_COUNT = 3;
 
     private static final Map<UUID, Integer> PREFERRED_ROWS = new HashMap<>();
 
@@ -67,15 +52,11 @@ public class TcChestMenu extends AbstractContainerMenu {
     private final TcChestBlockEntity chest;
     private final ContainerData data;
     private final Container window;
-    private final Container augment;
-    private final Container lock;
-    private final Container filter;
     private List<Integer> filtered = new ArrayList<>();
     private String query = "";
     private int scroll;
     private int lastVersion = -1;
     private boolean dirty = true;
-    private final Player viewer;
 
     /** The rows a player gets when opening a chest: their remembered size, never more than the chest needs. */
     public static int rowsFor(Player player, TcChestBlockEntity chest) {
@@ -98,57 +79,12 @@ public class TcChestMenu extends AbstractContainerMenu {
         super(type, id);
         this.rows = rows;
         this.chest = chest;
-        this.viewer = inventory.player;
         this.window = chest == null ? new SimpleContainer(rows * Window.COLS) : new WindowContainer();
-        this.augment = chest == null ? new SimpleContainer(1) : chest.augmentSlot;
-        this.lock = chest == null ? new SimpleContainer(1) : chest.lockSlot;
-        this.filter = chest == null ? new SimpleContainer(9) : chest.filterSlots;
         this.data = chest == null ? new SimpleContainerData(D_COUNT) : serverData(chest);
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < Window.COLS; c++) {
                 addSlot(new WindowSlot(window, r * Window.COLS + c, X + c * 18, GuiFit.HEAD + r * 18));
             }
-        }
-        int tools = GuiFit.HEAD + rows * GuiFit.ROW + 2;
-        addSlot(new Slot(augment, 0, X + 22, tools) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return stack.getItem() instanceof AugmentItem a && AugmentRules.canInstall(installed(), a.installed());
-            }
-
-            @Override
-            public int getMaxStackSize() {
-                return 1;
-            }
-        });
-        addSlot(new Slot(lock, 0, X, tools) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return stack.getItem() instanceof LockItem && (chest == null || !chest.hasLock());
-            }
-
-            @Override
-            public boolean mayPickup(Player player) {
-                return chest == null || chest.mayAccess(player);
-            }
-
-            @Override
-            public int getMaxStackSize() {
-                return 1;
-            }
-        });
-        for (int i = 0; i < 9; i++) {
-            addSlot(new Slot(filter, i, X + i * 18, tools + 20) {
-                @Override
-                public boolean mayPlace(ItemStack stack) {
-                    return false;
-                }
-
-                @Override
-                public boolean mayPickup(Player player) {
-                    return false;
-                }
-            });
         }
         int py = GuiFit.HEAD + rows * GuiFit.ROW + GuiFit.TOOLS + 14;
         for (int r = 0; r < 3; r++) {
@@ -172,12 +108,6 @@ public class TcChestMenu extends AbstractContainerMenu {
             public int get(int index) {
                 return switch (index) {
                     case D_FILTERED -> filtered.size();
-                    case D_AUGMENT -> c.augment() == null ? 0 : c.augment().ordinal() + 1;
-                    case D_LEVEL -> c.augmentLevel();
-                    case D_ENABLED -> c.augmentEnabled() ? 1 : 0;
-                    case D_REDSTONE -> c.redstone().ordinal();
-                    case D_WHITELIST -> c.filterWhitelist() ? 1 : 0;
-                    case D_LOCKED -> c.hasLock() ? 1 : 0;
                     case D_USED -> c.usedSlots();
                     case D_SLOTS -> c.getContainerSize();
                     default -> 0;
@@ -193,11 +123,6 @@ public class TcChestMenu extends AbstractContainerMenu {
                 return D_COUNT;
             }
         };
-    }
-
-    @Nullable
-    private AugmentRules.Installed installed() {
-        return augment.getItem(0).getItem() instanceof AugmentItem a ? a.installed() : null;
     }
 
     public int rows() {
@@ -230,30 +155,12 @@ public class TcChestMenu extends AbstractContainerMenu {
         scroll = Window.clampScroll(value, filteredCount(), rows);
     }
 
-    @Nullable
-    public Augment augmentKind() {
-        int a = data.get(D_AUGMENT);
-        return a <= 0 ? null : Augment.values()[a - 1];
-    }
-
     public int windowSlots() {
         return rows * Window.COLS;
     }
 
-    public int augmentIndex() {
-        return windowSlots();
-    }
-
-    public int lockIndex() {
-        return windowSlots() + 1;
-    }
-
-    public int filterIndex() {
-        return windowSlots() + 2;
-    }
-
     public int playerIndex() {
-        return windowSlots() + 11;
+        return windowSlots();
     }
 
     // ---- Server side: window mapping ----
@@ -360,51 +267,11 @@ public class TcChestMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(ItemStack stack) {
-            return isActive() && com.itmecasey.thoroughchests.ScriptEvents.allowInsert(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+            return isActive() && ScriptEvents.allowInsert(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
         }
     }
 
     // ---- Clicks ----
-
-    @Override
-    public void clicked(int slotId, int button, ContainerInput input, Player player) {
-        if (slotId >= filterIndex() && slotId < filterIndex() + 9 && (input == ContainerInput.PICKUP || input == ContainerInput.QUICK_MOVE)) {
-            ItemStack carried = getCarried();
-            filter.setItem(slotId - filterIndex(), carried.isEmpty() || button == 1 ? ItemStack.EMPTY : carried.copyWithCount(1));
-            return;
-        }
-        if (slotId == augmentIndex() && input == ContainerInput.PICKUP && chest != null) {
-            ItemStack carried = getCarried();
-            if (!carried.isEmpty()) {
-                if (carried.getItem() instanceof AugmentItem a && AugmentRules.canInstall(installed(), a.installed())) {
-                    boolean upgrade = AugmentRules.isUpgrade(installed(), a.installed());
-                    augment.setItem(0, carried.copyWithCount(1));
-                    carried.shrink(1);
-                    chest.augmentChanged(upgrade);
-                }
-                return;
-            }
-            super.clicked(slotId, button, input, player);
-            chest.augmentChanged(false);
-            return;
-        }
-        if (slotId == lockIndex() && chest != null && input != ContainerInput.QUICK_MOVE) {
-            boolean had = chest.hasLock();
-            super.clicked(slotId, button, input, player);
-            syncLock(player, had);
-            return;
-        }
-        super.clicked(slotId, button, input, player);
-    }
-
-    private void syncLock(Player player, boolean had) {
-        boolean has = !lock.getItem(0).isEmpty();
-        if (has && !had) {
-            chest.lockInstalled(player);
-        } else if (!has && had) {
-            chest.lockRemoved();
-        }
-    }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
@@ -417,14 +284,7 @@ public class TcChestMenu extends AbstractContainerMenu {
         }
         ItemStack stack = slot.getItem();
         ItemStack copy = stack.copy();
-        if (index >= filterIndex() && index < playerIndex()) {
-            return ItemStack.EMPTY;
-        }
         if (index < playerIndex()) {
-            boolean wasLock = index == lockIndex();
-            if (wasLock && !slot.mayPickup(player)) {
-                return ItemStack.EMPTY;
-            }
             if (!moveItemStackTo(stack, playerIndex(), slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
@@ -433,21 +293,7 @@ public class TcChestMenu extends AbstractContainerMenu {
             } else {
                 slot.setChanged();
             }
-            if (index == augmentIndex()) {
-                chest.augmentChanged(false);
-            } else if (wasLock) {
-                chest.lockRemoved();
-            }
             return copy;
-        }
-        if (stack.getItem() instanceof AugmentItem || stack.getItem() instanceof LockItem) {
-            int before = stack.getCount();
-            boolean ok = chest.installFrom(stack, player);
-            if (ok) {
-                slot.setChanged();
-                return copy.copyWithCount(before - stack.getCount() == 0 ? before : 1);
-            }
-            return ItemStack.EMPTY;
         }
         ItemStack rest = chest.insertStack(stack, false);
         if (rest.getCount() == stack.getCount()) {
@@ -485,10 +331,6 @@ public class TcChestMenu extends AbstractContainerMenu {
             return true;
         }
         switch (id) {
-            case BTN_TOGGLE -> chest.setAugmentEnabled(!chest.augmentEnabled());
-            case BTN_REDSTONE -> chest.setRedstone(chest.redstone().next());
-            case BTN_FILTER_MODE -> chest.setFilterWhitelist(!chest.filterWhitelist());
-            case BTN_CLEAR_LINK -> clearLink();
             case BTN_CLEAR_QUERY -> {
                 query = "";
                 dirty = true;
@@ -508,14 +350,6 @@ public class TcChestMenu extends AbstractContainerMenu {
         return true;
     }
 
-    private void clearLink() {
-        ItemStack stack = chest.augmentStack();
-        if (stack.getItem() instanceof AugmentItem a && a.augment() == Augment.VOID) {
-            stack.remove(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
-            chest.setChanged();
-        }
-    }
-
     public String query() {
         return query;
     }
@@ -531,9 +365,5 @@ public class TcChestMenu extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         return chest == null || (!chest.isRemoved() && chest.stillValid(player) && chest.mayAccess(player));
-    }
-
-    public RedstoneMode redstoneMode() {
-        return RedstoneMode.byOrdinal(data.get(D_REDSTONE));
     }
 }

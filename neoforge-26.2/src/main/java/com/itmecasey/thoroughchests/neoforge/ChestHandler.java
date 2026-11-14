@@ -55,9 +55,9 @@ final class ChestHandler implements ResourceHandler<ItemResource> {
     public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
         int in = inner.insert(index, resource, amount, transaction);
         int rest = amount - in;
-        if (rest > 0 && chest.voidActive() && Augments.linked(chest) == null) {
+        if (rest > 0 && chest.voidActive()) {
             ItemStack left = resource.toStack(rest);
-            if (chest.filterAllows(left) && Augments.isOverflowing(chest, left)) {
+            if (Augments.isOverflowing(chest, left)) {
                 return amount;
             }
         }

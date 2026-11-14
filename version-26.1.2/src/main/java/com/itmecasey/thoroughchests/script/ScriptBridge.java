@@ -12,7 +12,6 @@ import java.util.logging.Logger;
  */
 public final class ScriptBridge {
     private static final Logger LOG = Logger.getLogger("thoroughchests");
-    private static final ChestsApi API = new ChestsApi();
 
     private ScriptBridge() {
     }
@@ -35,7 +34,7 @@ public final class ScriptBridge {
             InvocationHandler handler = (proxy, method, args) -> {
                 if (method.getName().equals("install") && args != null && args.length == 3) {
                     if (wanted(args[0])) {
-                        put.invoke(null, args[2], "ThoroughChests", javaToJs.invoke(null, API, args[2]));
+                        put.invoke(null, args[2], "ThoroughChests", javaToJs.invoke(null, Bridges.API, args[2]));
                     }
                     return null;
                 }

@@ -4,7 +4,6 @@ import com.itmecasey.thoroughchests.Augment;
 import com.itmecasey.thoroughchests.ChestLevel;
 import com.itmecasey.thoroughchests.Dev;
 import com.itmecasey.thoroughchests.ModContent;
-import com.itmecasey.thoroughchests.RedstoneMode;
 import com.itmecasey.thoroughchests.ScriptEvents;
 import com.itmecasey.thoroughchests.Settings;
 import com.itmecasey.thoroughchests.augment.Augments;
@@ -139,7 +138,6 @@ public final class SelfTest {
     private static void augment(TcChestBlockEntity be, Augment a, int lv) {
         be.augmentSlot.setItem(0, new ItemStack(ModContent.augmentItem(a, lv)));
         be.augmentChanged(false);
-        be.setAugmentEnabled(true);
     }
 
     private static void fill(TcChestBlockEntity be, net.minecraft.world.item.Item item) {
@@ -210,9 +208,6 @@ public final class SelfTest {
         be.setItem(77, stack(Items.IRON_INGOT, 33));
         be.setItem(134, stack(Items.GOLD_INGOT, 2));
         augment(be, Augment.FURNACE, 2);
-        be.setRedstone(RedstoneMode.WHEN_POWERED);
-        be.setFilterWhitelist(true);
-        be.filterSlots.setItem(3, stack(Items.COAL, 1));
         be.lockInstalled(owner);
         be.lockSlot.setItem(0, stack(ModContent.LOCK, 1));
         be.sim.addFuel(500);
@@ -223,7 +218,6 @@ public final class SelfTest {
         verdict("save_keeps_every_slot", copy.getItem(0).getCount() == 7 && copy.getItem(77).getCount() == 33 && copy.getItem(134).is(Items.GOLD_INGOT), "");
         verdict("load_never_shrinks_below_stored_items", copy.getContainerSize() >= 135, "size=" + copy.getContainerSize());
         verdict("save_keeps_augment", copy.augment() == Augment.FURNACE && copy.augmentLevel() == 2, "");
-        verdict("save_keeps_settings", copy.redstone() == RedstoneMode.WHEN_POWERED && copy.filterWhitelist() && copy.filterSlots.getItem(3).is(Items.COAL), "");
         verdict("save_keeps_owner", copy.hasLock() && "selftest_owner".equals(copy.ownerName()) && owner.getStringUUID().equals(copy.ownerId()), "");
         verdict("save_keeps_furnace_bank", Math.abs(copy.sim.burnBank() - 500) < 1e-6, "bank=" + copy.sim.burnBank());
         Settings.reset();
@@ -256,7 +250,6 @@ public final class SelfTest {
         augment(be, Augment.MAGNET, 1);
         be.lockInstalled(owner);
         be.lockSlot.setItem(0, stack(ModContent.LOCK, 1));
-        be.filterSlots.setItem(0, stack(Items.IRON_INGOT, 1));
         InteractionResult wrong = useCard(p, ChestLevel.GOLD, owner);
         verdict("card_cannot_skip_a_level", wrong == InteractionResult.FAIL && level.getBlockState(p).getBlock() == ModContent.chest(ChestLevel.COPPER), "result=" + wrong);
         verdict("a_stranger_cannot_upgrade_a_locked_chest", useCard(p, ChestLevel.IRON, stranger) == InteractionResult.FAIL
@@ -267,10 +260,10 @@ public final class SelfTest {
             TcChestBlockEntity now = (TcChestBlockEntity) level.getBlockEntity(p);
             boolean ok = r == InteractionResult.SUCCESS && level.getBlockState(p).getBlock() == ModContent.chest(order[i]) && now != null
                     && now.getContainerSize() == order[i].slots() && now.getItem(35).getCount() == 9 && now.getItem(0).is(Items.EMERALD)
-                    && now.augment() == Augment.MAGNET && now.hasLock() && now.filterSlots.getItem(0).is(Items.IRON_INGOT);
+                    && now.augment() == Augment.MAGNET && now.hasLock();
             verdict("card_upgrades_to_" + order[i].id() + "_keeping_everything", ok, "result=" + r + " size=" + (now == null ? -1 : now.getContainerSize())
                     + " dirt=" + (now == null ? "" : now.getItem(35)) + " emerald=" + (now == null ? "" : now.getItem(0)) + " aug=" + (now == null ? "" : now.augment())
-                    + " lock=" + (now != null && now.hasLock()) + " filter=" + (now == null ? "" : now.filterSlots.getItem(0)));
+                    + " lock=" + (now != null && now.hasLock()));
         }
         verdict("netherite_card_does_nothing_on_netherite", useCard(p, ChestLevel.NETHERITE, owner) == InteractionResult.FAIL, "");
         BlockPos q = p.offset(4, 0, 0);
@@ -319,6 +312,10 @@ public final class SelfTest {
         for (Augment a : Augment.values()) {
             verdict("every_augment_has_an_item_" + a.id(), ModContent.augmentItem(a, 1) != null && ModContent.augmentItem(a, a.maxLevel()) != null, "");
         }
+        ItemStack back = be.augmentStack().copy();
+        verdict("sneak_use_with_an_empty_hand_takes_the_augment_back", be.takeAugment(owner) && be.augment() == null && be.overlayName().isEmpty()
+                && owner.getInventory().countItem(back.getItem()) >= 1, "overlay=" + be.overlayName());
+        verdict("overlay_names_the_installed_augment", ModContent.augmentItem(Augment.FURNACE, 3) != null && Augment.FURNACE.itemName(3).equals("furnace_augment_3"), "");
         verdict("compact_and_void_have_one_level", Augment.COMPACT.maxLevel() == 1 && Augment.VOID.maxLevel() == 1 && Augment.FURNACE.maxLevel() == 3, "");
     }
 
@@ -353,25 +350,6 @@ public final class SelfTest {
         tick(be, 25);
         verdict("any_recipe_setting_compacts_planks", count(be, Items.OAK_PLANKS) == 0 && count(be, Items.CRAFTING_TABLE) == 2, "tables=" + count(be, Items.CRAFTING_TABLE));
         Settings.reset();
-        be.setItem(5, stack(Items.IRON_INGOT, 9));
-        be.filterSlots.setItem(0, stack(Items.IRON_INGOT, 1));
-        be.setFilterWhitelist(false);
-        tick(be, 25);
-        verdict("compact_blacklist_protects_items", count(be, Items.IRON_INGOT) == 9, "");
-        be.setFilterWhitelist(true);
-        tick(be, 25);
-        verdict("compact_whitelist_allows_listed_items", count(be, Items.IRON_INGOT) == 0 && count(be, Items.IRON_BLOCK) == 3, "");
-        be.setItem(6, stack(Items.IRON_INGOT, 9));
-        be.setAugmentEnabled(false);
-        tick(be, 25);
-        verdict("compact_toggle_off_stops_it", count(be, Items.IRON_INGOT) == 9, "");
-        be.setAugmentEnabled(true);
-        be.setRedstone(RedstoneMode.WHEN_POWERED);
-        tick(be, 25);
-        verdict("redstone_mode_powered_waits_without_power", count(be, Items.IRON_INGOT) == 9, "");
-        be.setRedstone(RedstoneMode.WHEN_UNPOWERED);
-        tick(be, 25);
-        verdict("redstone_mode_unpowered_works_without_power", count(be, Items.IRON_INGOT) == 0, "");
         TcChestBlockEntity full = chest(p.offset(4, 0, 0), ChestLevel.COPPER);
         augment(full, Augment.COMPACT, 1);
         for (int i = 0; i < full.getContainerSize(); i++) {
@@ -417,16 +395,6 @@ public final class SelfTest {
         augment(plain, Augment.FURNACE, 1);
         tick(plain, 70);
         verdict("furnace_is_slower_than_blast_furnace_for_ore", count(plain, Items.IRON_INGOT) == 0, "");
-        TcChestBlockEntity off = chest(p.offset(8, 0, 3), ChestLevel.GOLD);
-        off.setItem(0, stack(Items.SAND, 1));
-        off.setItem(1, stack(Items.COAL, 1));
-        augment(off, Augment.FURNACE, 3);
-        off.setRedstone(RedstoneMode.WHEN_POWERED);
-        tick(off, 100);
-        verdict("furnace_waits_for_redstone", count(off, Items.GLASS) == 0, "");
-        off.setRedstone(RedstoneMode.IGNORE);
-        tick(off, 70);
-        verdict("furnace_runs_when_redstone_allows", count(off, Items.GLASS) == 1, "");
         Settings.set("furnace.speed.1", 10.0);
         TcChestBlockEntity fast = chest(p.offset(4, 0, 3), ChestLevel.GOLD);
         fast.setItem(0, stack(Items.SAND, 1));
@@ -467,19 +435,6 @@ public final class SelfTest {
         augment(be, Augment.MAGNET, 2);
         tick(be, 12);
         verdict("magnet_level_2_reaches_further", !far.isAlive() && count(be, Items.STONE) == 3, "stone=" + count(be, Items.STONE));
-        be.filterSlots.setItem(0, stack(Items.IRON_INGOT, 1));
-        be.setFilterWhitelist(true);
-        ItemEntity filtered = drop(p.offset(2, 0, 0), Items.GRAVEL, 4);
-        tick(be, 12);
-        verdict("magnet_whitelist_ignores_other_items", filtered.isAlive() && count(be, Items.GRAVEL) == 0, "");
-        be.setFilterWhitelist(false);
-        tick(be, 12);
-        verdict("magnet_blacklist_takes_everything_else", !filtered.isAlive() && count(be, Items.GRAVEL) == 4, "");
-        be.setAugmentEnabled(false);
-        ItemEntity idle = drop(p.offset(1, 0, 0), Items.SAND, 2);
-        tick(be, 12);
-        verdict("magnet_toggle_off_stops_it", idle.isAlive(), "");
-        be.setAugmentEnabled(true);
         augment(be, Augment.MAGNET, 1);
         ItemEntity wide = drop(p.offset(5, 0, 0), Items.CLAY_BALL, 2);
         tick(be, 12);
@@ -527,10 +482,6 @@ public final class SelfTest {
         Settings.set("feeder.effect_foods", true);
         verdict("effect_foods_can_be_enabled", Augments.feedPlayer(apples, level, owner), "");
         Settings.reset();
-        be.filterSlots.setItem(0, stack(Items.BREAD, 1));
-        be.setFilterWhitelist(false);
-        owner.getFoodData().setFoodLevel(8);
-        verdict("feeder_blacklist_skips_listed_food", !Augments.feedPlayer(be, level, owner) || count(be, Items.BREAD) == 3, "");
         cow.discard();
     }
 
@@ -555,37 +506,11 @@ public final class SelfTest {
         verdict("full_chest_rejects_without_void", be.insertFromAutomation(stack(Items.STONE, 5), false).getCount() == 5, "");
         be.augmentSlot.setItem(0, new ItemStack(ModContent.augmentItem(Augment.VOID, 1)));
         be.augmentChanged(false);
-        verdict("void_is_off_by_default", !be.augmentEnabled() && be.insertFromAutomation(stack(Items.STONE, 5), true).getCount() == 5, "");
-        be.setAugmentEnabled(true);
         verdict("void_destroys_overflow", be.insertFromAutomation(stack(Items.STONE, 5), false).isEmpty() && count(be, Items.STONE) == 0, "");
-        verdict("void_keeps_what_fits", be.insertFromAutomation(stack(Items.DIRT, 5), false).isEmpty() == true, "");
+        verdict("void_keeps_what_fits", be.insertFromAutomation(stack(Items.DIRT, 5), false).isEmpty(), "");
         be.removeItem(0, 64);
         verdict("void_fills_free_space_first", be.insertFromAutomation(stack(Items.STONE, 70), false).isEmpty() && count(be, Items.STONE) == 64, "stone=" + count(be, Items.STONE));
-        be.filterSlots.setItem(0, stack(Items.DIAMOND, 1));
-        be.setFilterWhitelist(true);
         fill(be, Items.DIRT);
-        verdict("void_whitelist_only_destroys_listed_items", be.insertFromAutomation(stack(Items.STONE, 5), false).getCount() == 5
-                && be.insertFromAutomation(stack(Items.DIAMOND, 5), false).isEmpty(), "");
-        be.filterSlots.setItem(0, ItemStack.EMPTY);
-        // Link
-        BlockPos q = p.offset(4, 0, 0);
-        TcChestBlockEntity target = chest(q, ChestLevel.COPPER);
-        ItemStack voidItem = new ItemStack(ModContent.augmentItem(Augment.VOID, 1));
-        CompoundTag tag = new CompoundTag();
-        tag.putString("link_dim", String.valueOf(level.dimension().identifier()));
-        tag.putInt("link_x", q.getX());
-        tag.putInt("link_y", q.getY());
-        tag.putInt("link_z", q.getZ());
-        voidItem.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-        be.augmentSlot.setItem(0, voidItem);
-        be.setAugmentEnabled(true);
-        verdict("void_link_passes_overflow_on", be.insertFromAutomation(stack(Items.STONE, 5), false).isEmpty() && count(target, Items.STONE) == 5, "linked=" + count(target, Items.STONE));
-        fill(target, Items.GRAVEL);
-        verdict("void_link_full_keeps_the_items", be.insertFromAutomation(stack(Items.SAND, 3), false).getCount() == 3, "");
-        // Hopper above a full chest
-        be.augmentSlot.setItem(0, new ItemStack(ModContent.augmentItem(Augment.VOID, 1)));
-        be.augmentChanged(false);
-        be.setAugmentEnabled(true);
         BlockPos hp = p.above();
         level.setBlock(hp, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.DOWN), 3);
         HopperBlockEntity hopper = (HopperBlockEntity) level.getBlockEntity(hp);
@@ -643,40 +568,15 @@ public final class SelfTest {
         int slot = menu.playerIndex();
         menu.clicked(slot, 0, ContainerInput.QUICK_MOVE, owner);
         verdict("shift_click_moves_player_items_into_any_chest_slot", count(be, Items.COPPER_INGOT) == 40 && owner.getInventory().getItem(9).isEmpty(), "");
-        // Augment slot through the menu
-        owner.getInventory().setItem(12, new ItemStack(ModContent.augmentItem(Augment.MAGNET, 1), 1));
-        menu.clicked(menu.playerIndex() + 3, 0, ContainerInput.QUICK_MOVE, owner);
-        verdict("shift_click_installs_an_augment", be.augment() == Augment.MAGNET && be.augmentLevel() == 1, "");
-        menu.setCarried(new ItemStack(ModContent.augmentItem(Augment.MAGNET, 2), 1));
-        menu.clicked(menu.augmentIndex(), 0, ContainerInput.PICKUP, owner);
-        verdict("clicking_a_higher_level_upgrades_and_consumes_the_old_one", be.augmentLevel() == 2 && menu.getCarried().isEmpty(), "carried=" + menu.getCarried());
-        menu.setCarried(new ItemStack(ModContent.augmentItem(Augment.FEEDER, 1), 1));
-        menu.clicked(menu.augmentIndex(), 0, ContainerInput.PICKUP, owner);
-        verdict("a_second_augment_kind_is_refused", be.augment() == Augment.MAGNET && !menu.getCarried().isEmpty(), "");
-        menu.setCarried(ItemStack.EMPTY);
-        // Toggles
-        menu.clickMenuButton(owner, TcChestMenu.BTN_TOGGLE);
-        menu.clickMenuButton(owner, TcChestMenu.BTN_REDSTONE);
-        menu.clickMenuButton(owner, TcChestMenu.BTN_FILTER_MODE);
-        verdict("buttons_toggle_the_chest_settings", !be.augmentEnabled() && be.redstone() == RedstoneMode.WHEN_POWERED && be.filterWhitelist(), "");
-        // Filter ghost slots
-        menu.setCarried(stack(Items.DIRT, 30));
-        menu.clicked(menu.filterIndex() + 2, 0, ContainerInput.PICKUP, owner);
-        verdict("filter_slots_copy_without_taking", be.filterSlots.getItem(2).is(Items.DIRT) && menu.getCarried().getCount() == 30, "");
-        menu.clicked(menu.filterIndex() + 2, 1, ContainerInput.PICKUP, owner);
-        verdict("filter_slots_clear_on_right_click", be.filterSlots.getItem(2).isEmpty(), "");
-        menu.setCarried(ItemStack.EMPTY);
-        // Lock slot
-        menu.setCarried(stack(ModContent.LOCK, 1));
-        menu.clicked(menu.lockIndex(), 0, ContainerInput.PICKUP, owner);
-        verdict("placing_a_lock_in_the_slot_sets_the_owner", be.hasLock() && "selftest_owner".equals(be.ownerName()), "");
-        menu.setCarried(ItemStack.EMPTY);
+        // Augments and the lock go in and out by sneak-use, never through the screen.
+        verdict("menu_has_only_the_window_and_the_inventory", menu.slots.size() == menu.windowSlots() + 36, "slots=" + menu.slots.size());
+        be.lockInstalled(owner);
+        be.lockSlot.setItem(0, stack(ModContent.LOCK, 1));
         owner.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
         stranger.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
         verdict("menu_closes_for_strangers_of_locked_chests", !menu.stillValid(stranger) && menu.stillValid(owner), "");
-        menu.clicked(menu.lockIndex(), 0, ContainerInput.PICKUP, owner);
-        verdict("taking_the_lock_out_unlocks_the_chest", !be.hasLock() && menu.getCarried().getItem() == ModContent.LOCK, "");
-        menu.setCarried(ItemStack.EMPTY);
+        be.takeLock(owner);
+        verdict("taking_the_lock_out_unlocks_the_chest", !be.hasLock() && owner.getInventory().countItem(ModContent.LOCK) >= 1, "");
         verdict("menu_counts_as_an_opener", be.openerCount() == 1, "openers=" + be.openerCount());
         menu.removed(owner);
         verdict("closing_the_menu_closes_the_lid", be.openerCount() == 0, "openers=" + be.openerCount());

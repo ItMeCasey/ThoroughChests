@@ -36,36 +36,33 @@ One class `TcChestBlock` with a `ChestLevel`, state `facing` (horizontal, placed
 
 ## GUI (design, Casey asked for scroll, search, fit any screen)
 Our own `TcChestMenu` and `TcChestScreen`, independent of JEI, REI, EMI and BEI.
-- The menu has a window of `rows * 9` chest slots, the augment slot, the lock slot, nine filter ghost slots and the player inventory. The window shows container slots `(scroll + row) * 9 + col` of the filtered list; clicks are resolved by the server, which keeps the window mapping, so shift-click, drag, double-click and hoppers agree.
+- The menu has a window of `rows * 9` chest slots and the player inventory, nothing else (Casey: only a search bar; augments and the lock never appear in the screen). The window shows container slots `(scroll + row) * 9 + col` of the filtered list; clicks are resolved by the server, which keeps the window mapping, so shift-click, drag, double-click and hoppers agree.
 - Rows adapt to the screen. Menu types exist for 1 to 12 rows. The screen computes how many rows fit the current scaled height; if that differs from the menu it asks the server (menu button) to reopen with that many rows and the server remembers the player's row count for the session. The default is 6. Width is always 9 columns (176 wide plus a side panel that moves under the main panel when the screen is too narrow). Because the layout is computed from the real scaled size, it fits any window size and any GUI scale; the smallest case keeps 1 row plus the player inventory and a compact player inventory when even that cannot fit.
 - Scrolling: mouse wheel over the window, a scrollbar, and Page keys. Sent to the server as menu button ids (no custom payload).
 - Search bar: an `EditBox`; the text is sent to the server as characters (button ids) and the server filters by item name, `@modid`, `#tag`. Search never touches the viewers' boxes.
-- Buttons: on the tools strip, augment on/off, redstone mode (ignore, powered, unpowered), filter mode (whitelist, blacklist), void link clear.
 - No hint, tutorial or explanatory text anywhere in the UI; buttons show icons and plain names, values show numbers.
 
 ## Augments (Casey)
 One augment per chest. Install rule (pure, in `AugmentRules`): level 1 of anything needs an empty augment slot; level 2 needs level 1 of the same augment installed; level 3 needs level 2. The upgrade consumes the old item. Shift-clicking an augment from the inventory applies this rule; right-clicking a chest while sneaking with an augment in hand does the same. Taking the augment out returns the installed item. Furnace and Blast Furnace cannot coexist because only one augment fits.
-Every augment can be switched off per chest, and an optional redstone mode (ignore, active when powered, active when not powered) gates all of them. Config holds every number.
+Augments have no switches, no redstone mode and no filters (Casey: no interface for them). Config holds every number.
 
 | Augment | Behavior | Levels | Config |
 |---|---|---|---|
-| Compact | Every interval, for each item the filter allows with a uniform crafting recipe (2x2 or 3x3 filled with that one item), crafts the result and puts it back. | 1 | interval, `compact.any_recipe` |
+| Compact | Every interval, for each item with a uniform crafting recipe (2x2 or 3x3 filled with that one item), crafts the result and puts it back. | 1 | interval, `compact.any_recipe` |
 | Furnace | While fuel is in the chest, takes an item with a smelting recipe, cooks it with furnace timing, puts the result back. | 1-3 | speed, fuel use per level |
 | Blast Furnace | Same with blasting recipes (ores, metals). | 1-3 | speed, fuel use per level |
 | Magnet | Pulls item entities within a radius into the chest. | 1-3 | radius, cadence per level |
 | Feeder | Feeds players (hunger) and friendly animals (heal, grow, breed) from food in the chest. | 1-3 | range, cadence per level |
-| Void | Destroys items that do not fit when inserted by automation (hoppers, pipes, magnet); with a link set it passes them to the linked inventory instead. Off by default (config and per-chest toggle). | 1 | `void.enabled_by_default` |
+| Void | Destroys items that do not fit when inserted by automation (hoppers, pipes, magnet) and clears hoppers stuck on a full chest. | 1 | none |
 
 Compact decision (design): by default only compacts into results that can be crafted back into at least as many of the same items (ingots to blocks, not planks to crafting tables); `compact.any_recipe=true` allows any uniform recipe whose result has fewer items than it consumes. Filters protect either way.
-Filters (design): Compact, Magnet, Feeder, Void each use the chest's one nine-slot ghost filter with whitelist or blacklist mode; an empty filter allows everything. Magnet uses it for what it picks up, Feeder for what it uses as food, Compact for what it compacts, Void for what it destroys (empty means all).
 Furnace details: fuel is any item with a fuel value (`fuelValues`), preferring items without a smelting recipe; an item is never both fuel and ingredient at once; fuel remainders (buckets) return to the chest; a finished item waits if there is no room. Time per item is the recipe time divided by the level's speed, and fuel burned per item is the recipe time times the level's fuel factor.
-Void link (design): sneak-use the Void augment on a block with an inventory to store its position and dimension in the item; the link travels with the item. Without a link the augment destroys overflow.
 
 ## Lock (design: Casey left the form open)
-A separate key item, `chest_lock`, in its own slot beside the augment slot, so it never competes with the one-augment limit. Putting a lock in as player P stores P's UUID and name as owner (shown by SMWTI and Jade). Only the owner (and operators when `lock.ops_bypass`) opens, breaks or takes the lock; others get a short action bar message. Automation (hoppers, pipes) still works unless `lock.block_automation` is true. Explosions follow the level rules.
+A separate key item, `chest_lock`, held apart from the augment, so it never competes with the one-augment limit. Sneak-using a lock on a chest as player P stores P's UUID and name as owner (shown by SMWTI and Jade). Only the owner (and operators when `lock.ops_bypass`) opens, breaks or takes the lock; others get a short action bar message. Automation (hoppers, pipes) still works unless `lock.block_automation` is true. Explosions follow the level rules.
 
 ## Redstone (Casey)
-Comparator signal as above; redstone mode per chest for augments; chests are not powered by redstone otherwise.
+Comparator signal as above; augments ignore redstone.
 
 ## Compatibility (Casey, global rule)
 All optional, by plugin annotation or reflection; the mod runs the same with none installed, and the headless self test runs a build without any of them.
@@ -75,14 +72,14 @@ All optional, by plugin annotation or reflection; the mod runs the same with non
 - KubeJS: recipes and tags are datapack JSON; a bridge class registers the same events for KubeJS where a KubeJS build exists (NeoForge 26.1.2), compile-checked there; elsewhere datapacks are the interface.
 - Wiki pages Compatibility and Scripting under `wiki/thoroughchests`.
 
-## Config (`config/thoroughchests.properties`)
-Slots, blast resistance, every augment number per level, intervals, void default, lock options, compact mode, feeder behavior (breed on or off, effect foods). Properties file like the studio's other mods; a missing key uses its default and the file is rewritten with comments.
+## Config (`config/thoroughchests-common.toml`)
+Slots, blast resistance, every augment number per level, intervals, void default, lock options, compact mode, feeder behavior (breed on or off, effect foods). Built from `common/Settings.java`, the single list of keys, defaults, ranges and comments: NeoForge `ModConfigSpec` (with the in-game config screen) and Forge `ForgeConfigSpec`, registered as COMMON, with the values pushed into `Settings` when the file loads or reloads. The values are used on the server; the client needs none of them (the screen takes slot counts from the menu). An old `thoroughchests.properties` is read once to seed the defaults of a new file and is never changed or deleted.
 
 ## Textures (Casey)
 Vanilla textures only, generated by `scripts/make_textures.py` and regenerable. Every chest texture is the vanilla chest texture with a border frame built from the texture of the level below: Copper takes the frame from the vanilla planks look, Iron a copper frame, Gold an iron frame, Diamond a gold frame, Netherite a diamond frame. Palettes are sampled from the vanilla block textures so the shading stays vanilla; nothing is drawn in an invented style. The model is the vanilla chest model and animation. Item icons, GUI buttons and the GUI sheet are built the same way. Textures are never marked approved.
 
 ## Tests
-- Unit tests (common): levels, slot config, augment rules, filters, redstone mode, furnace simulation, compaction math, window mapping, search matching, GUI row fitting, settings, script events.
+- Unit tests (common): levels, slot config, augment rules, config definitions, furnace simulation, compaction math, window mapping, search matching, GUI row fitting, settings, script events.
 - Headless self test (`SELFTEST DONE failures=0`) in every module, dev tools only: chests per level, slot counts, upgrade cards, each augment and level, filters, locks, explosion resistance, persistence on upgrade and on world save and load (save to NBT and reload), comparator, hopper access, menu window and search, scripts.
 - Real server self test per build with `scripts/server_check.py` (ports 8760 to 8765).
 - Client frames through the project tour hook with `launch-isolated.ps1`, at most two clients, saved under `docs/frames`.

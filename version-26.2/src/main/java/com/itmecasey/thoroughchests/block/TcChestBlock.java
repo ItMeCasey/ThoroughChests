@@ -209,6 +209,9 @@ public class TcChestBlock extends BaseEntityBlock implements SimpleWaterloggedBl
             com.itmecasey.thoroughchests.item.AugmentItem.say(player, Component.translatable("message.thoroughchests.locked", chest.ownerName()));
             return InteractionResult.SUCCESS;
         }
+        if (player.isSecondaryUseActive() && player.getMainHandItem().isEmpty() && (chest.takeAugment(player) || chest.takeLock(player))) {
+            return InteractionResult.SUCCESS;
+        }
         if (player instanceof ServerPlayer) {
             int rows = TcChestMenu.rowsFor(player, chest);
             player.openMenu(new SimpleMenuProvider((id, inv, p) -> new TcChestMenu(ModContent.menu(rows), rows, id, inv, chest), chest.displayName()));

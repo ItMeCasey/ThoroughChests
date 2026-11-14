@@ -12,6 +12,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.RegisterEvent;
@@ -22,12 +24,20 @@ import org.jetbrains.annotations.Nullable;
 @Mod(ThoroughChests.MODID)
 public final class ForgeThoroughChests {
     public ForgeThoroughChests(FMLJavaModLoadingContext context) {
-        ThoroughChests.init(FMLPaths.CONFIGDIR::get);
-        com.itmecasey.thoroughchests.script.ScriptBridge.install();
+        context.registerConfig(ModConfig.Type.COMMON, ChestConfig.SPEC);
+        ModConfigEvent.Loading.getBus(context.getModBusGroup()).addListener(e -> onConfig(e.getConfig()));
+        ModConfigEvent.Reloading.getBus(context.getModBusGroup()).addListener(e -> onConfig(e.getConfig()));
+        com.itmecasey.thoroughchests.script.Bridges.install(FMLPaths.GAMEDIR.get());
         RegisterEvent.getBus(context.getModBusGroup()).addListener(ForgeThoroughChests::register);
         AttachCapabilitiesEvent.BlockEntities.BUS.addListener(ForgeThoroughChests::attach);
         ForgeClient.install(context);
         com.itmecasey.thoroughchests.Dev.call("com.itmecasey.thoroughchests.forge.dev.ForgeDev", "install", context);
+    }
+
+    private static void onConfig(ModConfig config) {
+        if (config.getSpec() == ChestConfig.SPEC) {
+            ChestConfig.push();
+        }
     }
 
     private static void register(RegisterEvent event) {

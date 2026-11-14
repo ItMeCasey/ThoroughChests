@@ -26,8 +26,7 @@ public class ThoroughChestsSmwtiPlugin implements ISmwtiPlugin {
             }
             tooltip.add(Component.translatable("smwti.thoroughchests.level", chest.level().title(), chest.usedSlots(), chest.getContainerSize()));
             if (chest.augment() != null) {
-                String key = chest.augmentEnabled() ? "smwti.thoroughchests.augment" : "smwti.thoroughchests.augment_off";
-                tooltip.add(Component.translatable(key, chest.augmentStack().getHoverName()));
+                tooltip.add(Component.translatable("smwti.thoroughchests.augment", chest.augmentStack().getHoverName()));
             }
             if (chest.hasLock()) {
                 tooltip.add(Component.translatable("smwti.thoroughchests.owner", chest.ownerName()));

@@ -21,14 +21,14 @@ Thorough Chests adds a global `ThoroughChests` to ModJS server scripts when ModJ
 
 ## Reading chests
 
-- `ThoroughChests.chest(dimension, x, y, z)` returns a read-only map for the chest at that position, or `null` when there is none (or the server has not started): `level`, `slots`, `used`, `augment` (empty text for none), `augmentLevel`, `augmentEnabled`, `redstone` (`ignore`, `when_powered`, `when_unpowered`), `locked`, `owner`, `open` (players with it open), `comparator`.
+- `ThoroughChests.chest(dimension, x, y, z)` returns a read-only map for the chest at that position, or `null` when there is none (or the server has not started): `level`, `slots`, `used`, `augment` (empty text for none), `augmentLevel`, `locked`, `owner`, `open` (players with it open), `comparator`.
 - `ThoroughChests.count(dimension, x, y, z, itemId)` counts one item in a chest (`-1` when there is no chest).
 - `ThoroughChests.levels()` and `ThoroughChests.augments()` list the ids. `ThoroughChests.slots(level)` gives the configured slot count of a level.
 
 ## Rules and settings
 
 - `ThoroughChests.addItemRule(fn)`: when `fn(itemId)` returns `false`, no chest takes that item (players, hoppers, pipes and augments alike).
-- `ThoroughChests.settingKeys()`, `setting(key)` and `setSetting(key, value)` read and change the values of `config/thoroughchests.properties` until the game closes (the file is not changed). Slot counts apply to chests created or loaded afterwards; augment numbers apply at once.
+- `ThoroughChests.settingKeys()`, `setting(key)` and `setSetting(key, value)` read and change the values of `config/thoroughchests-common.toml` until the game closes (the file is not changed). Slot counts apply to chests created or loaded afterwards; augment numbers apply at once.
 
 ## Example
 

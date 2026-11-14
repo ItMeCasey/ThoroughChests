@@ -8,8 +8,8 @@ public final class GuiFit {
     public static final int HEAD = 36;
     /** Pixels of one slot row. */
     public static final int ROW = 18;
-    /** Pixels of the strip with the lock slot, the augment slot, the buttons and the filter row. */
-    public static final int TOOLS = 40;
+    /** Pixels of a strip between the chest rows and the player inventory (none: the screen has only the rows and the inventory). */
+    public static final int TOOLS = 0;
     /** Pixels of the player inventory block (label, three rows, gap, hotbar, padding). */
     public static final int PLAYER = 90;
     /** Pixels of the strip below the player inventory. */

@@ -1,14 +1,9 @@
 package com.itmecasey.thoroughchests.client;
 
-import com.itmecasey.thoroughchests.Augment;
 import com.itmecasey.thoroughchests.GuiFit;
-import com.itmecasey.thoroughchests.RedstoneMode;
 import com.itmecasey.thoroughchests.Window;
 import com.itmecasey.thoroughchests.menu.TcChestMenu;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -18,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 
 /**
  * The chest screen. It draws the vanilla look with plain fills, fits itself to the window (the menu is reopened with fewer or more rows when
- * the screen is smaller or taller), and holds the search box, scrollbar and the augment controls.
+ * the screen is smaller or taller), and holds the search box and the scrollbar.
  */
 public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
     private static final int PANEL = 0xFFC6C6C6;
@@ -32,10 +27,6 @@ public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
     private static long lastRequest;
 
     private EditBox search;
-    private Button toggle;
-    private Button redstone;
-    private Button mode;
-    private Button clearLink;
     private String sent = "";
     private boolean fitChecked;
     private boolean draggingScroll;
@@ -58,34 +49,12 @@ public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
         search.setResponder(this::searchChanged);
         addRenderableWidget(search);
         setInitialFocus(search);
-        int ty = topPos + GuiFit.HEAD + rows * GuiFit.ROW + 2;
-        clearLink = addRenderableWidget(Button.builder(Component.literal("x"), b -> press(TcChestMenu.BTN_CLEAR_LINK))
-                .bounds(leftPos + TcChestMenu.X + 42, ty + 2, 12, 14).build());
-        toggle = addRenderableWidget(Button.builder(Component.empty(), b -> press(TcChestMenu.BTN_TOGGLE))
-                .bounds(leftPos + TcChestMenu.X + 56, ty + 2, 28, 14).build());
-        redstone = addRenderableWidget(Button.builder(Component.empty(), b -> press(TcChestMenu.BTN_REDSTONE))
-                .bounds(leftPos + TcChestMenu.X + 86, ty + 2, 44, 14).build());
-        mode = addRenderableWidget(Button.builder(Component.empty(), b -> press(TcChestMenu.BTN_FILTER_MODE))
-                .bounds(leftPos + TcChestMenu.X + 132, ty + 2, 30, 14).build());
-        updateButtons();
     }
 
     private void press(int id) {
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id);
         }
-    }
-
-    private void updateButtons() {
-        boolean has = menu.augmentKind() != null;
-        toggle.active = has;
-        redstone.active = has;
-        mode.active = has && menu.augmentKind().usesFilter();
-        toggle.setMessage(Component.translatable(menu.value(TcChestMenu.D_ENABLED) != 0 ? "gui.thoroughchests.on" : "gui.thoroughchests.off"));
-        RedstoneMode rm = menu.redstoneMode();
-        redstone.setMessage(Component.translatable("gui.thoroughchests.redstone." + rm.name().toLowerCase(java.util.Locale.ROOT)));
-        mode.setMessage(Component.translatable(menu.value(TcChestMenu.D_WHITELIST) != 0 ? "gui.thoroughchests.allow" : "gui.thoroughchests.deny"));
-        clearLink.visible = menu.augmentKind() == Augment.VOID;
     }
 
     private void searchChanged(String text) {
@@ -111,7 +80,6 @@ public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
     @Override
     protected void containerTick() {
         super.containerTick();
-        updateButtons();
         int slots = menu.value(TcChestMenu.D_SLOTS);
         if (!fitChecked && slots > 0) {
             fitChecked = true;
@@ -238,20 +206,5 @@ public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
         Component used = Component.translatable("gui.thoroughchests.used", menu.value(TcChestMenu.D_USED), menu.value(TcChestMenu.D_SLOTS));
         g.text(font, used, imageWidth - 8 - font.width(used), titleLabelY, TEXT, false);
         g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, TEXT, false);
-    }
-
-    @Override
-    protected void extractTooltip(GuiGraphicsExtractor g, int mx, int my) {
-        if (hoveredSlot != null && !hoveredSlot.hasItem() && menu.getCarried().isEmpty()) {
-            int i = hoveredSlot.index;
-            String key = i == menu.lockIndex() ? "lock" : i == menu.augmentIndex() ? "augment" : i >= menu.filterIndex() && i < menu.playerIndex() ? "filter" : null;
-            if (key != null) {
-                List<Component> lines = new ArrayList<>();
-                lines.add(Component.translatable("gui.thoroughchests.slot." + key));
-                g.setComponentTooltipForNextFrame(font, lines, mx, my);
-                return;
-            }
-        }
-        super.extractTooltip(g, mx, my);
     }
 }

@@ -32,7 +32,6 @@ public class ThoroughChestsJadePlugin implements IWailaPlugin {
                     data.putInt("used", chest.usedSlots());
                     data.putInt("slots", chest.getContainerSize());
                     data.putString("augment", chest.augment() == null ? "" : chest.augmentStack().getHoverName().getString());
-                    data.putBoolean("enabled", chest.augmentEnabled());
                     data.putString("owner", chest.hasLock() ? chest.ownerName() : "");
                 }
             }
@@ -57,7 +56,7 @@ public class ThoroughChestsJadePlugin implements IWailaPlugin {
                 tooltip.add(Component.translatable("smwti.thoroughchests.level", levelName(accessor), data.getIntOr("used", 0), data.getIntOr("slots", 0)));
                 String augment = data.getStringOr("augment", "");
                 if (!augment.isEmpty()) {
-                    tooltip.add(Component.literal(augment + (data.getBooleanOr("enabled", true) ? "" : " (off)")));
+                    tooltip.add(Component.literal(augment));
                 }
                 String owner = data.getStringOr("owner", "");
                 if (!owner.isEmpty()) {

@@ -2,6 +2,11 @@ package com.itmecasey.thoroughchests.neoforge;
 
 import com.itmecasey.thoroughchests.ModContent;
 import com.itmecasey.thoroughchests.ThoroughChests;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -13,12 +18,23 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 /** NeoForge entry point for Minecraft 26.x. Registers the content and exposes every chest slot to pipes. */
 @Mod(ThoroughChests.MODID)
 public final class NeoForgeThoroughChests {
-    public NeoForgeThoroughChests(IEventBus modBus) {
-        ThoroughChests.init(FMLPaths.CONFIGDIR::get);
-        com.itmecasey.thoroughchests.script.ScriptBridge.install();
+    public NeoForgeThoroughChests(IEventBus modBus, ModContainer container) {
+        container.registerConfig(ModConfig.Type.COMMON, ChestConfig.SPEC);
+        modBus.addListener((ModConfigEvent.Loading e) -> onConfig(e.getConfig()));
+        modBus.addListener((ModConfigEvent.Reloading e) -> onConfig(e.getConfig()));
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+            ClientConfigScreen.register(container);
+        }
+        com.itmecasey.thoroughchests.script.Bridges.install(FMLPaths.GAMEDIR.get());
         modBus.addListener(NeoForgeThoroughChests::register);
         modBus.addListener(NeoForgeThoroughChests::capabilities);
         com.itmecasey.thoroughchests.Dev.call("com.itmecasey.thoroughchests.neoforge.dev.NeoForgeDev", "install", modBus);
+    }
+
+    private static void onConfig(ModConfig config) {
+        if (config.getSpec() == ChestConfig.SPEC) {
+            ChestConfig.push();
+        }
     }
 
     private static void register(RegisterEvent event) {

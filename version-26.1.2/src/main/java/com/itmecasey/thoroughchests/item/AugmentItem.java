@@ -4,22 +4,17 @@ import com.itmecasey.thoroughchests.Augment;
 import com.itmecasey.thoroughchests.AugmentRules;
 import com.itmecasey.thoroughchests.block.TcChestBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 /**
- * An augment of one kind and level. Sneak-use on a chest installs it (or upgrades the installed lower level). The Void augment also
- * stores a link: sneak-use on any block with a vanilla-style inventory.
+ * An augment of one kind and level. Sneak-use on a chest installs it (or upgrades the installed lower level).
  */
 public class AugmentItem extends Item {
     private final Augment augment;
@@ -70,25 +65,6 @@ public class AugmentItem extends Item {
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.FAIL;
-        }
-        if (augment == Augment.VOID && player.isSecondaryUseActive()) {
-            if (level.isClientSide()) {
-                return InteractionResult.SUCCESS;
-            }
-            if (HopperBlockEntity.getContainerAt(level, pos) != null) {
-                CompoundTag tag = new CompoundTag();
-                CustomData existing = context.getItemInHand().get(DataComponents.CUSTOM_DATA);
-                if (existing != null) {
-                    tag = existing.copyTag();
-                }
-                tag.putString("link_dim", String.valueOf(level.dimension().identifier()));
-                tag.putInt("link_x", pos.getX());
-                tag.putInt("link_y", pos.getY());
-                tag.putInt("link_z", pos.getZ());
-                context.getItemInHand().set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-                say(player, Component.translatable("message.thoroughchests.linked", pos.getX(), pos.getY(), pos.getZ()));
-                return InteractionResult.SUCCESS;
-            }
         }
         return InteractionResult.PASS;
     }

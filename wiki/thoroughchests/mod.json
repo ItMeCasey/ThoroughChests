@@ -1,0 +1,48 @@
+{
+  "name": "Thorough Chests",
+  "tagline": "Scrolling chests with five levels, upgrade cards and six augments for Forge and NeoForge.",
+  "icon": "images/icon.png",
+  "home": "home",
+  "minecraft": "26.1.2, 26.2, 26.3",
+  "loaders": "NeoForge, Forge",
+  "license": "Thorough Chests is released under the MIT License.",
+  "links": [
+    {
+      "label": "Source",
+      "url": "https://github.com/ItMeCasey/ThoroughChests"
+    },
+    {
+      "label": "Issues",
+      "url": "https://github.com/ItMeCasey/ThoroughChests/issues"
+    }
+  ],
+  "nav": [
+    {
+      "title": "Getting started",
+      "pages": [
+        { "slug": "home", "title": "Thorough Chests" },
+        { "slug": "install", "title": "Install and versions" },
+        { "slug": "recipes", "title": "Recipes" }
+      ]
+    },
+    {
+      "title": "Using chests",
+      "pages": [
+        { "slug": "chests", "title": "Levels and upgrade cards" },
+        { "slug": "screen", "title": "The chest screen" },
+        { "slug": "lock", "title": "The chest lock" },
+        { "slug": "automation", "title": "Hoppers, pipes and redstone" },
+        { "slug": "augments", "title": "Augments" }
+      ]
+    },
+    {
+      "title": "Pack makers",
+      "pages": [
+        { "slug": "settings", "title": "Settings" },
+        { "slug": "compatibility", "title": "Compatibility" },
+        { "slug": "scripting", "title": "Scripting" },
+        { "slug": "troubleshooting", "title": "Troubleshooting" }
+      ]
+    }
+  ]
+}

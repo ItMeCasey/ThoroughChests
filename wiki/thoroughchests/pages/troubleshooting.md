@@ -8,7 +8,7 @@ A lock is on the chest and you are not its owner. The owner opens it and takes t
 
 ## An augment does nothing
 
-- Check the On/Off button and the redstone mode.
+- Check that the augment is installed: the overlay on the lid shows it.
 - A furnace augment needs fuel in the chest that has no smelting recipe of its own (coal, charcoal, blocks of coal).
 - A Magnet only takes items that no longer have a pickup delay.
 - Compact only uses recipes that can be crafted back unless `compact.any_recipe` is true.

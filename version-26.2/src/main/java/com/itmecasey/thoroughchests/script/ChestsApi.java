@@ -75,8 +75,6 @@ public final class ChestsApi {
         out.put("used", chest.usedSlots());
         out.put("augment", chest.augment() == null ? "" : chest.augment().id());
         out.put("augmentLevel", chest.augmentLevel());
-        out.put("augmentEnabled", chest.augmentEnabled());
-        out.put("redstone", chest.redstone().name().toLowerCase(java.util.Locale.ROOT));
         out.put("locked", chest.hasLock());
         out.put("owner", chest.ownerName());
         out.put("open", chest.openerCount());

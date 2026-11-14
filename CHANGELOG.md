@@ -8,6 +8,7 @@ First release. Minecraft 26.1.2, 26.2 and 26.3 on Forge and NeoForge.
 - Upgrade cards: one card, one level, contents kept.
 - Scrolling, searchable chest screen that fits any screen size.
 - Chest Lock with an owner.
-- Augments: Compact, Furnace (levels 1 to 3), Blast Furnace (levels 1 to 3), Magnet (levels 1 to 3), Feeder (levels 1 to 3) and Void, with per-chest on and off, redstone mode and item filters.
+- Settings in the loader config (`thoroughchests-common.toml`), with the NeoForge config screen; an old `thoroughchests.properties` is imported once.
+- Augments: Compact, Furnace (levels 1 to 3), Blast Furnace (levels 1 to 3), Magnet (levels 1 to 3), Feeder (levels 1 to 3) and Void, drawn as an overlay on the chest lid.
 - Vanilla lid animation and sounds, comparator signal across the whole inventory, hopper and pipe access to every slot.
 - Optional: BEI, JEI and REI categories, Show Me What This Is and Jade info lines, ModJS global, KubeJS bridge.

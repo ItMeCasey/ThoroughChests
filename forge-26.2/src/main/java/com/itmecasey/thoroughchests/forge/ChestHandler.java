@@ -10,8 +10,8 @@ import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Every slot of a chest as a Forge item handler. With the Void augment on, an insertion that finds the whole chest full is destroyed
- * or passed to the link, so pipes never block on a full chest.
+ * Every slot of a chest as a Forge item handler. With the Void augment on, an insertion that finds the whole chest full is destroyed,
+ * so pipes never block on a full chest.
  */
 final class ChestHandler implements IItemHandler {
     private final TcChestBlockEntity chest;

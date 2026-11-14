@@ -255,20 +255,6 @@ public final class ShotTour {
         then(2, () -> typeIntoScreen("dia"));
         shoot("gui_search_dia", 30);
         then(2, () -> close());
-        for (Augment a : Augment.values()) {
-            then(4, () -> install(big, a, a.maxLevel()));
-            then(6, () -> open(big));
-            shoot("gui_augment_" + a.id(), 30);
-            then(2, () -> close());
-        }
-        then(4, () -> onServer(server -> {
-            TcChestBlockEntity be = chestAt(server, big);
-            be.lockInstalled(server.getPlayerList().getPlayers().get(0));
-            be.lockSlot.setItem(0, new ItemStack(ModContent.LOCK));
-        }));
-        then(6, () -> open(big));
-        shoot("gui_locked", 30);
-        then(2, () -> close());
         // Fitting: the same chest at other GUI scales.
         for (int sc : new int[] {1, 2, 4, 5}) {
             then(6, () -> {

@@ -27,8 +27,6 @@ interface ThoroughChestsChestInfo {
   used: number;
   augment: AugmentId | '';
   augmentLevel: number;
-  augmentEnabled: boolean;
-  redstone: 'ignore' | 'when_powered' | 'when_unpowered';
   locked: boolean;
   owner: string;
   open: number;

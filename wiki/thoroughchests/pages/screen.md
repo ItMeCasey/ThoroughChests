@@ -12,12 +12,4 @@ The search bar filters the window by item name. Start a word with `@` to match a
 
 The screen counts how many rows fit the window at the current GUI scale. If that differs from the rows it opened with, it asks the server to reopen with the right number, and the server remembers the number for you for the session. The smallest layout is one row. A chest with fewer slots than the window has rows opens only as tall as it needs.
 
-## Augment, lock and filter
-
-Under the chest rows: the lock slot, the augment slot, three buttons and nine filter slots.
-
-- **On or Off** switches the augment for this chest.
-- **Always, Powered or Inverse** is the redstone mode (see [[filters]]).
-- **Allow or Deny** is the filter mode.
-- The filter slots take a copy of whatever item you click them with.
-- The small x clears the link of a Void augment.
+There is nothing else on the screen: no buttons and no extra slots. Augments and the lock work from the outside of the chest.

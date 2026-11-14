@@ -31,11 +31,6 @@ public enum Augment {
         return maxLevel == 1 ? id() + "_augment" : id() + "_augment_" + level;
     }
 
-    /** Whether the chest's item filter applies to this augment; the furnaces take any item. */
-    public boolean usesFilter() {
-        return this != FURNACE && this != BLAST_FURNACE;
-    }
-
     @Nullable
     public static Augment byId(String id) {
         for (Augment a : values()) {

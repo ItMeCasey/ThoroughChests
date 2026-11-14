@@ -41,7 +41,7 @@ public final class Augments {
     private Augments() {
     }
 
-    /** Runs the installed augment for this tick. The caller has checked that it is installed, on, and allowed by redstone. */
+    /** Runs the installed augment for this tick. The caller has checked that it is installed. */
     public static void tick(TcChestBlockEntity chest, ServerLevel level) {
         Augment augment = chest.augment();
         int lv = Math.max(1, chest.augmentLevel());
@@ -98,7 +98,7 @@ public final class Augments {
         List<ItemStack> tried = new ArrayList<>();
         for (int i = 0; i < chest.getContainerSize() && budget > 0; i++) {
             ItemStack s = chest.getItem(i);
-            if (s.isEmpty() || !chest.filterAllows(s) || !remainder(s).isEmpty() || s.getCount() < 4) {
+            if (s.isEmpty() || !remainder(s).isEmpty() || s.getCount() < 4) {
                 continue;
             }
             boolean seen = false;
@@ -272,9 +272,6 @@ public final class Augments {
                 break;
             }
             ItemStack stack = e.getItem();
-            if (!chest.filterAllows(stack)) {
-                continue;
-            }
             int before = stack.getCount();
             ItemStack rest = chest.insertFromAutomation(stack, false);
             if (rest.isEmpty()) {
@@ -294,7 +291,7 @@ public final class Augments {
     private static ItemStack food(TcChestBlockEntity chest, boolean wantAnimal, @org.jetbrains.annotations.Nullable Animal animal) {
         for (int i = 0; i < chest.getContainerSize(); i++) {
             ItemStack s = chest.getItem(i);
-            if (s.isEmpty() || !chest.filterAllows(s)) {
+            if (s.isEmpty()) {
                 continue;
             }
             if (wantAnimal) {
@@ -368,73 +365,15 @@ public final class Augments {
 
     // ---- Void ----
 
-    /** What the Void augment does with items that did not fit: pass them to the link, or destroy them. */
+    /** What the Void augment does with items that did not fit: destroy them. */
     public static ItemStack overflow(TcChestBlockEntity chest, ItemStack rest, boolean simulate) {
-        if (!chest.filterAllows(rest)) {
-            return rest;
-        }
-        Container link = linked(chest);
-        if (link != null) {
-            return insertInto(link, rest, simulate);
-        }
         if (!simulate && chest.getLevel() instanceof ServerLevel level) {
             announce(chest, level, "void", id(rest), rest.getCount());
         }
         return ItemStack.EMPTY;
     }
 
-    /** The inventory the Void augment links to, or null. */
-    public static Container linked(TcChestBlockEntity chest) {
-        CustomData data = chest.augmentStack().get(DataComponents.CUSTOM_DATA);
-        if (data == null || !(chest.getLevel() instanceof ServerLevel here)) {
-            return null;
-        }
-        net.minecraft.nbt.CompoundTag tag = data.copyTag();
-        String dim = tag.getStringOr("link_dim", "");
-        if (dim.isEmpty()) {
-            return null;
-        }
-        ServerLevel target = here.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(dim)));
-        if (target == null) {
-            return null;
-        }
-        BlockPos pos = new BlockPos(tag.getIntOr("link_x", 0), tag.getIntOr("link_y", 0), tag.getIntOr("link_z", 0));
-        if (!target.isLoaded(pos) || pos.equals(chest.getBlockPos()) && target == here) {
-            return null;
-        }
-        return HopperBlockEntity.getContainerAt(target, pos);
-    }
-
-    private static ItemStack insertInto(Container to, ItemStack stack, boolean simulate) {
-        ItemStack rest = stack.copy();
-        for (int i = 0; i < to.getContainerSize() && !rest.isEmpty(); i++) {
-            ItemStack s = to.getItem(i);
-            if (!to.canPlaceItem(i, rest)) {
-                continue;
-            }
-            if (s.isEmpty()) {
-                int move = Math.min(rest.getCount(), to.getMaxStackSize(rest));
-                if (!simulate) {
-                    to.setItem(i, rest.copyWithCount(move));
-                }
-                rest.shrink(move);
-            } else if (ItemStack.isSameItemSameComponents(s, rest)) {
-                int move = Math.min(rest.getCount(), to.getMaxStackSize(s) - s.getCount());
-                if (move > 0) {
-                    if (!simulate) {
-                        s.grow(move);
-                    }
-                    rest.shrink(move);
-                }
-            }
-        }
-        if (!simulate && rest.getCount() != stack.getCount()) {
-            to.setChanged();
-        }
-        return rest;
-    }
-
-    /** Hoppers pointing into a full chest would wait forever; with Void on, their stuck items are destroyed or forwarded. */
+    /** Hoppers pointing into a full chest would wait forever; with Void on, their stuck items are destroyed. */
     private static void voidHoppers(TcChestBlockEntity chest, ServerLevel level) {
         BlockPos pos = chest.getBlockPos();
         for (Direction dir : Direction.values()) {
@@ -449,11 +388,11 @@ public final class Augments {
             }
             for (int i = 0; i < hopper.getContainerSize(); i++) {
                 ItemStack s = hopper.getItem(i);
-                if (s.isEmpty() || !chest.filterAllows(s) || chest.insertStack(s, true).getCount() != s.getCount()) {
+                if (s.isEmpty() || chest.insertStack(s, true).getCount() != s.getCount()) {
                     continue;
                 }
-                ItemStack rest = overflow(chest, s.copy(), false);
-                hopper.setItem(i, rest);
+                overflow(chest, s.copy(), false);
+                hopper.setItem(i, ItemStack.EMPTY);
                 break;
             }
         }
