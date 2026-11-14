@@ -2,7 +2,7 @@
 
 **Big chests that scroll and search, five levels from copper to netherite, and augments that compact, smelt, attract, feed and void items. For Forge and NeoForge.**
 
-Thorough Chests adds a chest with its own big inventory. It is one block, never a double chest, with the vanilla lid animation and sounds. Open it and you get a scrolling window with a search bar, a sort button and quick-stack that fits any screen size. Upgrade cards move a chest up a level and keep what is inside, and one augment per chest makes it work for you.
+Thorough Chests adds a chest with its own big inventory. It is one block, never a double chest, with the vanilla lid animation and sounds. Open it and you get a scrolling window with a search bar that fits any screen size. Upgrade cards move a chest up a level and keep what is inside, and one augment per chest makes it work for you.
 
 ![Augments and cards](https://raw.githubusercontent.com/ItMeCasey/ThoroughChests/main/branding/banners/features.png)
 
@@ -10,7 +10,7 @@ Thorough Chests adds a chest with its own big inventory. It is one block, never 
 
 - **Five levels:** Copper 36 slots, Iron 54, Gold 72, Diamond 108 and Netherite 135 by default. Blast resistance rises with every level and Netherite is immune to explosions.
 - **Upgrade cards:** one card moves a chest exactly one level, contents kept. Only the copper chest is crafted: a vanilla chest and eight copper ingots.
-- **Chest screen:** scroll with the wheel or the scrollbar, search by name, `@mod` or `#tag`, sort, and quick-stack the items the chest already holds.
+- **Chest screen:** scroll with the wheel or the scrollbar, search by name, `@mod` or `#tag`.
 - **Chest Lock:** a lock slot beside the augment slot. Only the owner and operators open, mine or unlock the chest.
 - **Compact augment:** crafts uniform 2x2 and 3x3 recipes down, so ingots become blocks.
 - **Furnace and Blast Furnace augments, levels 1 to 3:** smelt what is in the chest while it holds fuel, and put the results back. Higher levels are faster and use less fuel.

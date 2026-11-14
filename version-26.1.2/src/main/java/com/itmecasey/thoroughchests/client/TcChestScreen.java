@@ -18,7 +18,7 @@ import net.minecraft.world.inventory.Slot;
 
 /**
  * The chest screen. It draws the vanilla look with plain fills, fits itself to the window (the menu is reopened with fewer or more rows when
- * the screen is smaller or taller), and holds the search box, scrollbar, sort and quick-stack buttons and the augment controls.
+ * the screen is smaller or taller), and holds the search box, scrollbar and the augment controls.
  */
 public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
     private static final int PANEL = 0xFFC6C6C6;
@@ -53,15 +53,11 @@ public class TcChestScreen extends AbstractContainerScreen<TcChestMenu> {
     protected void init() {
         super.init();
         int rows = menu.rows();
-        search = new EditBox(font, leftPos + TcChestMenu.X, topPos + 18, 96, 12, Component.translatable("gui.thoroughchests.search"));
+        search = new EditBox(font, leftPos + TcChestMenu.X, topPos + 18, 162, 12, Component.translatable("gui.thoroughchests.search"));
         search.setMaxLength(40);
         search.setResponder(this::searchChanged);
         addRenderableWidget(search);
         setInitialFocus(search);
-        addRenderableWidget(Button.builder(Component.translatable("gui.thoroughchests.sort"), b -> press(TcChestMenu.BTN_SORT))
-                .bounds(leftPos + TcChestMenu.X + 98, topPos + 17, 30, 14).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.thoroughchests.stack"), b -> press(TcChestMenu.BTN_STACK))
-                .bounds(leftPos + TcChestMenu.X + 130, topPos + 17, 32, 14).build());
         int ty = topPos + GuiFit.HEAD + rows * GuiFit.ROW + 2;
         clearLink = addRenderableWidget(Button.builder(Component.literal("x"), b -> press(TcChestMenu.BTN_CLEAR_LINK))
                 .bounds(leftPos + TcChestMenu.X + 42, ty + 2, 12, 14).build());

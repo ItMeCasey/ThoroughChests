@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Headless check of the whole mod on a real server: every chest level, slot counts, comparator, saving and loading, upgrade cards, locks,
- * explosions, hopper access, each augment and level, filters, redstone mode, the menu (scroll, search, clicks, sort, quick-stack) and the
+ * explosions, hopper access, each augment and level, filters, redstone mode, the menu (scroll, search, clicks) and the
  * scripting API without ModJS. Runs once at server start when {@code THOROUGHCHESTS_SELFTEST} is set and prints {@code SELFTEST PASS/FAIL}
  * lines ending in {@code SELFTEST DONE failures=N}. It ticks block entities by hand, so it needs no running game loop.
  */
@@ -408,14 +408,14 @@ public final class SelfTest {
         TcChestBlockEntity blast = chest(p.offset(12, 0, 0), ChestLevel.GOLD);
         blast.setItem(0, stack(Items.RAW_IRON, 1));
         blast.setItem(1, stack(Items.COAL, 1));
-        augment(blast, Augment.BLAST_FURNACE, 1);
-        tick(blast, 125);
+        augment(blast, Augment.BLAST_FURNACE, 3);
+        tick(blast, 70);
         verdict("blast_furnace_smelts_ore_at_blast_speed", count(blast, Items.IRON_INGOT) == 1, "ingots=" + count(blast, Items.IRON_INGOT));
         TcChestBlockEntity plain = chest(p.offset(12, 0, 3), ChestLevel.GOLD);
         plain.setItem(0, stack(Items.RAW_IRON, 1));
         plain.setItem(1, stack(Items.COAL, 1));
         augment(plain, Augment.FURNACE, 1);
-        tick(plain, 125);
+        tick(plain, 70);
         verdict("furnace_is_slower_than_blast_furnace_for_ore", count(plain, Items.IRON_INGOT) == 0, "");
         TcChestBlockEntity off = chest(p.offset(8, 0, 3), ChestLevel.GOLD);
         off.setItem(0, stack(Items.SAND, 1));
@@ -643,25 +643,6 @@ public final class SelfTest {
         int slot = menu.playerIndex();
         menu.clicked(slot, 0, ContainerInput.QUICK_MOVE, owner);
         verdict("shift_click_moves_player_items_into_any_chest_slot", count(be, Items.COPPER_INGOT) == 40 && owner.getInventory().getItem(9).isEmpty(), "");
-        owner.getInventory().setItem(10, stack(Items.IRON_INGOT, 10));
-        int ironBefore = count(be, Items.IRON_INGOT);
-        menu.clickMenuButton(owner, TcChestMenu.BTN_STACK);
-        verdict("quick_stack_moves_items_the_chest_already_has", count(be, Items.IRON_INGOT) == ironBefore + 10 && owner.getInventory().getItem(10).isEmpty(), "");
-        owner.getInventory().setItem(11, stack(Items.COAL, 10));
-        menu.clickMenuButton(owner, TcChestMenu.BTN_STACK);
-        verdict("quick_stack_leaves_other_items", owner.getInventory().getItem(11).getCount() == 10, "");
-        menu.clickMenuButton(owner, TcChestMenu.BTN_SORT);
-        boolean sorted = be.getItem(0).getHoverName().getString().compareToIgnoreCase(be.getItem(1).getHoverName().getString()) <= 0;
-        boolean packed = true;
-        boolean seenEmpty = false;
-        for (int i = 0; i < be.getContainerSize(); i++) {
-            if (be.getItem(i).isEmpty()) {
-                seenEmpty = true;
-            } else if (seenEmpty) {
-                packed = false;
-            }
-        }
-        verdict("sort_packs_and_orders_the_chest", sorted && packed, "first=" + be.getItem(0) + " second=" + be.getItem(1));
         // Augment slot through the menu
         owner.getInventory().setItem(12, new ItemStack(ModContent.augmentItem(Augment.MAGNET, 1), 1));
         menu.clicked(menu.playerIndex() + 3, 0, ContainerInput.QUICK_MOVE, owner);

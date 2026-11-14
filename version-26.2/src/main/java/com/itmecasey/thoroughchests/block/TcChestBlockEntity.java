@@ -278,53 +278,6 @@ public class TcChestBlockEntity extends BlockEntity implements Container, LidBlo
         return count - left;
     }
 
-    /** Merges stacks and sorts them by name, then registry id, then larger stacks first. */
-    public void sortItems() {
-        List<ItemStack> all = new ArrayList<>();
-        for (ItemStack s : items) {
-            if (s.isEmpty()) {
-                continue;
-            }
-            boolean merged = false;
-            for (ItemStack t : all) {
-                if (ItemStack.isSameItemSameComponents(s, t) && t.getCount() < getMaxStackSize(t)) {
-                    int move = Math.min(s.getCount(), getMaxStackSize(t) - t.getCount());
-                    t.grow(move);
-                    s.shrink(move);
-                    if (s.isEmpty()) {
-                        merged = true;
-                        break;
-                    }
-                }
-            }
-            if (!merged) {
-                all.add(s.copy());
-            }
-        }
-        all.sort(Comparator.comparing((ItemStack s) -> s.getHoverName().getString().toLowerCase(java.util.Locale.ROOT))
-                .thenComparing(s -> BuiltInRegistries.ITEM.getKey(s.getItem()).toString())
-                .thenComparing(s -> -s.getCount()));
-        for (int i = 0; i < items.size(); i++) {
-            items.set(i, i < all.size() ? all.get(i) : ItemStack.EMPTY);
-        }
-        setChanged();
-    }
-
-    /** Moves items the chest already holds from the player's main inventory (not the hotbar) into the chest. */
-    public int quickStack(Player player) {
-        int moved = 0;
-        for (int i = 9; i < 36; i++) {
-            ItemStack s = player.getInventory().getItem(i);
-            if (!s.isEmpty() && countOf(s) > 0) {
-                int before = s.getCount();
-                ItemStack rest = insertStack(s, false);
-                moved += before - rest.getCount();
-                player.getInventory().setItem(i, rest);
-            }
-        }
-        return moved;
-    }
-
     public int comparatorSignal() {
         float sum = 0;
         boolean any = false;

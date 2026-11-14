@@ -10,7 +10,7 @@ Docs: https://itmecasey.com/wiki/thoroughchests/. Listing text: [`curseforge/DES
 |---|---|
 | Copper, Iron, Gold, Diamond and Netherite Chest | One block with one inventory: 36, 54, 72, 108 and 135 slots by default. Blast resistance rises with each level and Netherite is immune to explosions. Vanilla lid animation and sounds, comparator signal across the whole inventory, hoppers and pipes reach every slot |
 | Upgrade cards | One card moves a chest exactly one level and keeps everything in it. Only the copper chest has a crafting recipe (a vanilla chest and eight copper ingots) |
-| Chest screen | Scrolling window with a search bar (name, `@mod`, `#tag`), a sort button and quick-stack; it fits any window size and GUI scale |
+| Chest screen | Scrolling window with a search bar (name, `@mod`, `#tag`); it fits any window size and GUI scale |
 | Chest Lock | Its own slot beside the augment slot; only the owner (and operators) opens, mines or unlocks the chest |
 | Compact augment | Crafts uniform 2x2 and 3x3 recipes down (ingots to blocks) |
 | Furnace and Blast Furnace augments, levels 1 to 3 | Smelt what is in the chest while it holds fuel; higher levels are faster and use less fuel |

@@ -35,13 +35,11 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The chest menu: a window of {@code rows * 9} slots over the chest, the augment slot, the lock slot, nine filter ghost slots and the
  * player inventory. The server keeps the mapping from window slot to chest slot (scroll and search), so every click, shift-click and
- * drag is resolved against the real chest. Scroll, search, sort and the toggles arrive as menu button ids.
+ * drag is resolved against the real chest. Scroll, search and the toggles arrive as menu button ids.
  */
 public class TcChestMenu extends AbstractContainerMenu {
     public static final int X = 13;
     public static final int WIDTH = 188;
-    public static final int BTN_SORT = 1;
-    public static final int BTN_STACK = 2;
     public static final int BTN_TOGGLE = 3;
     public static final int BTN_REDSTONE = 4;
     public static final int BTN_FILTER_MODE = 5;
@@ -487,8 +485,6 @@ public class TcChestMenu extends AbstractContainerMenu {
             return true;
         }
         switch (id) {
-            case BTN_SORT -> chest.sortItems();
-            case BTN_STACK -> chest.quickStack(player);
             case BTN_TOGGLE -> chest.setAugmentEnabled(!chest.augmentEnabled());
             case BTN_REDSTONE -> chest.setRedstone(chest.redstone().next());
             case BTN_FILTER_MODE -> chest.setFilterWhitelist(!chest.filterWhitelist());
