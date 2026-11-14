@@ -143,9 +143,9 @@ def main():
             icon = item_art.augment_icon(v, kind, lv)
             save(icon, "item", f"{name}.png")
             entries.append((name, icon))
-            # The chest overlay: the same 12x12 design on the south face of the 12x12x1 plate model (its UV box puts that face at 14,1 of a 32x32 sheet).
-            sheet = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-            sheet.alpha_composite(item_art.augment_canvas(v, kind, lv), (14, 1))
+            # The chest overlay: the same 12x12 design on the top face of the 4x4x1 plate model (4x4 chest pixels on the top of the lid, top right: a 64x64 layer with a 192x192 sheet, the top face at 12,0: one design pixel is a third of a chest pixel).
+            sheet = Image.new("RGBA", (192, 192), (0, 0, 0, 0))
+            sheet.alpha_composite(item_art.augment_canvas(v, kind, lv), (12, 0))
             save(sheet, "entity", "chest", f"overlay_{name}.png")
     lock = item_art.lock(v)
     save(lock, "item", "chest_lock.png")
