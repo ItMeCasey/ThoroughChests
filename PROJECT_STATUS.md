@@ -35,7 +35,7 @@ Spend: none
 - [~] BEI plugin: categories for every recipe (w:2)
 - [~] JEI plugin (NeoForge 26.1.2, 26.2, 26.3) (w:2)
 - [~] REI plugin (NeoForge 26.1.2, 26.2, 26.3) (w:2)
-- [~] EMI plugin (no build exists for 26.x: known gap) (w:1)
+- [ ] EMI plugin (no build exists for 26.x: known gap) (w:1)
 - [~] SMWTI block info (w:1)
 - [~] Jade block info (NeoForge) (w:1)
 - [x] ModJS global: events, reads, content hooks, typed API, docs, tests (w:4)
