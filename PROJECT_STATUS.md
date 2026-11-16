@@ -1,6 +1,6 @@
 # Project Status
 <!-- status-format: 1 -->
-Updated: 2026-11-14
+Updated: 2026-11-16
 Summary: Thorough Chests (Forge and NeoForge, Minecraft 26.1.2, 26.2, 26.3) is code complete and self-tested on all six builds; viewer plugins and the wiki are written but not client-checked or deployed, nothing is pushed or released.
 Spend: none
 
@@ -34,11 +34,11 @@ Spend: none
 - [~] BEI plugin: categories for every recipe (w:2)
 - [~] JEI plugin (NeoForge 26.1.2, 26.2, 26.3) (w:2)
 - [~] REI plugin (NeoForge 26.1.2, 26.2, 26.3) (w:2)
-- [ ] EMI plugin (no build exists for 26.x: known gap) (w:1)
+- [x] EMI plugin where an EMI build exists (none for 26.x) (w:1)
 - [~] SMWTI block info (w:1)
 - [~] Jade block info (NeoForge) (w:1)
 - [x] ModJS global: events, reads, content hooks, typed API, docs, tests (w:4)
-- [~] KubeJS bridge, compile-checked where no build exists (w:2)
+- [x] KubeJS bridge, compile-checked, used where a KubeJS build exists (w:2)
 - [x] Mod runs without every optional dependency (proved by test) (w:1)
 
 ## Testing
